@@ -1,0 +1,2 @@
+201205081638   0     0     0goring C:\Users\goring\Documents\WISC\No-Analgoue Error\AxisOne = IDW(moder_pollen_mds.csv Events,  'axis_one', #, 2, SAMPLE, 12, #, 0.
+201205081638   0     0     0goring C:\Users\goring\Documents\WISC\No-Analgoue Error\axistwo = IDW(moder_pollen_mds.csv Events,  'axis_two', #, 2, SAMPLE, 12, #, 0.
