@@ -17,19 +17,24 @@ plot(climate[,2:3], pch=19, cex=0.6, col=rgb(0.1, 0.1, 0.1, 0.3))
 mds <- data.frame(pol.mds$points)
 
 ggplot(data = mds, aes(x = X1, y = X2)) +
-  geom_point() + theme_bw()
+  geom_point(alpha=0.5, size = 2) + theme_bw() +
+  xlab('MDS Axis One') + ylab('MDS Axis Two') +
+    theme(text = element_text(size=24, family='serif'))
 
 ```
 
 ```{r MinMaxDissim, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations'}
 
-dissim.scores <- data.frame(dissim = c(min.diss, max.diss),
+dissim.scores <- data.frame(dissim = c(min.diss, max.diss, as.vector(dists)),
                             class   = c(rep('Min', length(min.diss)),
-                                        rep('Max', length(max.diss))))
+                                        rep('Max', length(max.diss)), rep('Dists', length(as.vector(dists)))))
               
 ggplot(dissim.scores) + 
   geom_density(aes(x = dissim, fill=class), alpha=0.5) +
-  facet_wrap(~class, scales='free') +
-  theme_bw()
+  #facet_wrap(~class, scales='free') +
+  theme_bw() +
+  theme(text = element_text(size=24, family='serif'))
+
 
 ```
+
