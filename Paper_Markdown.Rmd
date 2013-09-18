@@ -11,10 +11,12 @@ source('R/data_setup.R')
 ```{r SiteLocations, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations'}
 map <- map_data('world')
 
-ggplot(data = map, aes(long, lat, group=group)) + geom_path(color='black') +
-   coord_map(xlim=c(-170, -40), ylim=c(20, 83))
+map <- subset(map, map$long > -170 & map$long < -40)
+map <- subset(map, map$lat > 20 & map$lat < 83)
 
-plot(climate[,2:3], pch=19, cex=0.6, col=rgb(0.1, 0.1, 0.1, 0.3))
+ggplot(data = data.frame(map), aes(long, lat)) + geom_path(aes(group=group), color='black') +
+  geom_point(data = data.frame(climate), aes(x = LONDD, y = LATDD)) +
+  coord_map(xlim=c(-170, -40), ylim=c(21, 83))
 
 ```
 
