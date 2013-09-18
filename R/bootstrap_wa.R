@@ -6,7 +6,6 @@ quantiles <- c(0, quantile(ecdf(diag.dist), c(seq(0, 0.2, by=0.001), seq(0.21, 1
 
 vals <- c(seq(0, 0.2, by=0.001), seq(0.21, 1, by=0.01))
 
-
 wa.res <- list(mean_prediction  = matrix(ncol=length(vals), nrow=nrow(new.pol)),
                sample_size      = matrix(ncol=length(vals), nrow=nrow(new.pol)),
                bias             = matrix(ncol=length(vals), nrow=nrow(new.pol)),

@@ -2,24 +2,19 @@ Non-analogues in paleoecological reconstruction - the effects of analogue distan
 ========================================================
 
 ```{r}
+
 source('R/data_setup.R')
 
 ```
 
 
 ```{r SiteLocations, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations'}
+map <- map_data('world')
+
+ggplot(data = map, aes(long, lat, group=group)) + geom_path(color='black') +
+   coord_map(xlim=c(-170, -40), ylim=c(20, 83))
+
 plot(climate[,2:3], pch=19, cex=0.6, col=rgb(0.1, 0.1, 0.1, 0.3))
-
-```
-
-```{r SiteMDS, fig.width=7, fig.height=6, fig.cap='Figure: North American site MDS scores'}
-
-mds <- data.frame(pol.mds$points)
-
-ggplot(data = mds, aes(x = X1, y = X2)) +
-  geom_point(alpha=0.5, size = 2) + theme_bw() +
-  xlab('MDS Axis One') + ylab('MDS Axis Two') +
-    theme(text = element_text(size=24, family='serif'))
 
 ```
 
@@ -37,4 +32,17 @@ ggplot(dissim.scores) +
 
 
 ```
+Figure X.  Distribution of squared-chord dissimilarity values.  The 95% confidence interval for the minumum spanning distance in the North American Modern Pollen Database is 0.10 - 0.48.  We choose 0.48 as our cut-off for 'non-analogue' distances in the database.
 
+
+```{r SiteMDS, fig.width=7, fig.height=6, fig.cap='Figure: North American site MDS scores'}
+
+mds <- data.frame(pol.mds$points,
+                  non.ana = factor(min.diss > 0.48))
+
+ggplot(data = mds, aes(x = X1, y = X2)) +
+  geom_point(alpha=0.5, size = 4, aes(color = non.ana)) + theme_bw() +
+  xlab('MDS Axis One') + ylab('MDS Axis Two') +
+    theme(text = element_text(size=24, family='serif'))
+
+```

@@ -20,16 +20,6 @@ i <- 1; j <- 1
 #  For MAT to work we don't need to re-calculate the distace matrix, we just need to know the
 #  sample of interest and the subset:
 
-#  A function 
-subset.pol <- function(set){
-  
-  calib.samples <- sample((1:length(set))[set], replace=TRUE)
-  
-  list(calib.pol  = new.pol[calib.samples, ],
-       calib.clim = climate[calib.samples,4])
-
-}
-
 fmat <- function(x){
   #  returns the means of the 1:10 closest to calculate the RMSE for analogue selection:
   
@@ -69,7 +59,6 @@ mat.fun <- function(z, j, min){
 sfExport(list = list('diag.dist'))
 sfExport(list = list('mat.fun'))
 sfExport(list = list('new.pol'))
-sfExport(list = list('subset.pol'))
 sfExport(list = list('climate'))
 
 for(i in i:length(vals)){
@@ -108,3 +97,10 @@ for(i in i:length(vals)){
   save(mat.res, file = 'data/mat.res.RData')
   cat('\n', i)
 }
+
+par(mfrow=c(2, 1))
+plot(quantiles[-282], mat.res$mean_prediction[1,], ylim = range(mat.res$mean_prediction, na.rm=TRUE), type='l', col=rgb(0.1, 0.1, 0.1,0.1))
+for(i in 1:2289)lines(quantiles[-282], mat.res$mean_prediction[i,], col=rgb(0.1, 0.1, 0.1,0.01))
+rug(x = clim)
+plot(quantiles[-282], wa.res$mean_prediction[1,], ylim = range(wa.res$mean_prediction, na.rm=TRUE), type='l', col=rgb(0.1, 0.1, 0.1,0.1))
+for(i in 1:2289)lines(quantiles[-282], wa.res$mean_prediction[i,], col=rgb(0.1, 0.1, 0.1,0.01))
