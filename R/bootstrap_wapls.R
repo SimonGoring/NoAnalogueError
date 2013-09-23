@@ -1,6 +1,6 @@
 library(snowfall)
 
-sfInit(parallel = TRUE, cpus = 3)
+sfInit(parallel = TRUE, cpus = 4)
 
 quantiles <- c(0, quantile(ecdf(diag.dist), c(seq(0, 0.2, by=0.001), seq(0.21, 1, by=0.01))))
 
@@ -21,7 +21,7 @@ subset.pol <- function(set){
   zeros <- colSums(new.pol[calib.samples,], na.rm = TRUE) == 0
   
   list(calib.pol  = new.pol[calib.samples,!zeros],
-       calib.clim = climate[calib.samples,4],
+       calib.clim = climate[calib.samples,10],
        zeros = zeros)
 
 }
@@ -56,15 +56,14 @@ sfExport(list = list('climate'))
 sfLibrary(rioja)
 
 
-for(i in i:length(vals)){
+for(i in 1:length(vals)){
   #  This runs through each analogue distance
   keep.pol <- aaply(diag.dist, 1, 
                     function(x) {x > quantiles[i]}, 
                     .progress = "text")
-
-  sfExport(list = list('keep.pol'))
-  
   diag(keep.pol) <- FALSE
+  
+  sfExport(list = list('keep.pol'))
   
   for(j in 1:nrow(new.pol)){
     
@@ -74,8 +73,8 @@ for(i in i:length(vals)){
     
       wapls.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
       wapls.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
-      wapls.res$bias[j, i] <- (climate[j,4] - mean(prediction, na.rm=TRUE))^2
-      wapls.res$exp[j, i]  <- mean((climate[j,4] - prediction)^2)
+      wapls.res$bias[j, i] <- (climate[j,10] - mean(prediction, na.rm=TRUE))^2
+      wapls.res$exp[j, i]  <- mean((climate[j,10] - prediction)^2)
       wapls.res$var[j, i]  <- mean((mean(prediction) - prediction)^2)
     }
     
