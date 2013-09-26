@@ -30,8 +30,8 @@ ggplot(dissim.scores) +
   geom_density(aes(x = dissim, fill=class), alpha=0.5) +
   #facet_wrap(~class, scales='free') +
   theme_bw() +
-  theme(text = element_text(size=24, family='serif'))
-
+  theme(text = element_text(size=24, family='serif')) +
+  scale_x_sqrt()
 
 ```
 Figure X.  Distribution of squared-chord dissimilarity values.  The 95% confidence interval for the minumum spanning distance in the North American Modern Pollen Database is 0.10 - 0.48.  We choose 0.48 as our cut-off for 'non-analogue' distances in the database.
@@ -42,9 +42,17 @@ Figure X.  Distribution of squared-chord dissimilarity values.  The 95% confiden
 mds <- data.frame(pol.mds$points,
                   non.ana = factor(min.diss > 0.48))
 
-ggplot(data = mds, aes(x = X1, y = X2)) +
-  geom_point(alpha=0.5, size = 4, aes(color = non.ana)) + theme_bw() +
+non.ana <- ggplot(data = mds, aes(x = X1, y = X2)) +
+  geom_point(alpha=0.5, size = 4, aes(color = non.ana)) +   
+  theme_bw() +
   xlab('MDS Axis One') + ylab('MDS Axis Two') +
-    theme(text = element_text(size=24, family='serif'))
+  theme(text = element_text(size=24, family='serif'))
+
+non.ana.map <- ggplot(data = data.frame(map), aes(long, lat)) + 
+  geom_path(aes(group=group), color='black') +
+  geom_point(data = data.frame(climate), 
+             aes(x = LONDD, y = LATDD, color = mds$non.ana)) +
+  coord_map(xlim=c(-170, -40), ylim=c(21, 83))
+
 
 ```
