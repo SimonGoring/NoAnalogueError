@@ -1,41 +1,65 @@
 Non-analogues in paleoecological reconstruction - the effects of analogue distance
 ========================================================
 
+**Abstract**
+Some jibberish.
+
 ```{r}
+library(gridExtra)
 
 source('R/data_setup.R')
 
 ```
 
+Introduction
+=========================
+Pollen assemblages are widely used for paleoclimatic reconstruction during the Holocene, but this method is also applied to pollen assemblages from the last Glacial period (Bartlein et al., 2011), as well as to earlier pollen assemblages, such as those during the Eemian (Brewer et al, 2008).  A particular challenge for climate reconstruction using these much earlier samples is the presence of non-analogue vegetation.  Non-analogue pollen assemblages pose a problem for many reconstruction techniques, these vegetation assemblages may be the result of sets of climate variables that no longer co-exist, ecological conditions resulting from differing rates of species migration or release from herbivores (Gill et al., 2009?), or as a result of changes in human land use (St. Jacques?, maybe not the best. . .).  
+
+Predicting climate from pollen in non-analogue space is likely to increase the uncertainty of models, possibly introduce systematic bias in predictions, and is likely to increase the variability of predictions across a time-series of predictions from a single site. However, high-quality terrestrial proxies for climate are important for understanding past climate change, and can act as a constraint on models of climate change in the past derived from GCMs in regions where little proxy data is available.  Thus, understanding the behaviour of pollen-based climate reconstructions in non-analogue space is an important first stem in understanding these reconstructions.
+
+Although we cannot know the values for temperature or 
+
+Methods:
+=========================
+
+Sites from across North America were used to build a modern analogue dataset.
 
 ```{r SiteLocations, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations'}
 map <- map_data('world')
 
-map <- subset(map, map$long > -170 & map$long < -40)
+map <- subset(map, map$long > -170 & map$long < -30)
 map <- subset(map, map$lat > 20 & map$lat < 83)
 
-ggplot(data = data.frame(map), aes(long, lat)) + geom_path(aes(group=group), color='black') +
-  geom_point(data = data.frame(climate), aes(x = LONDD, y = LATDD)) +
-  coord_map(xlim=c(-170, -40), ylim=c(21, 83))
+ggplot(data = data.frame(map), aes(long, lat)) + geom_path(aes(group=group), color='gray') +
+  geom_point(data = data.frame(climate), aes(x = LONDD, y = LATDD), alpha = 0.5) +
+  theme_bw() +
+  xlab('') + ylab('') +
+  theme(axis.text=element_text(size=12, family='serif')) +
+  coord_map(projection='albers', lat0=30, lat1=50, xlim=c(-145, -60), ylim=c(26, 75))
 
 ```
+**Figure 1**. Location of sample plots used for analysis.  Samples are derived from a modern pollen dataset.
 
+
+When we 
 ```{r MinMaxDissim, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations'}
 
 dissim.scores <- data.frame(dissim = c(min.diss, max.diss, as.vector(dists)),
-                            class   = c(rep('Min', length(min.diss)),
-                                        rep('Max', length(max.diss)), rep('Dists', length(as.vector(dists)))))
+                            class   = c(rep('Minimum', length(min.diss)),
+                                        rep('Maximim', length(max.diss)), rep('All', length(as.vector(dists)))))
               
 ggplot(dissim.scores) + 
   geom_density(aes(x = dissim, fill=class), alpha=0.5) +
-  #facet_wrap(~class, scales='free') +
   theme_bw() +
-  theme(text = element_text(size=24, family='serif')) +
-  scale_x_sqrt()
+  xlab('Squared-chord Dissimilarity') +
+  ylab('Density') +
+  theme(text = element_text(size=24, family='serif'),
+        strip.text = element_text(size=14, family='serif'),
+        axis.text = element_text(size = 12, family='serif')) +
+  scale_x_log10() + scale_y_sqrt()
 
 ```
-Figure X.  Distribution of squared-chord dissimilarity values.  The 95% confidence interval for the minumum spanning distance in the North American Modern Pollen Database is 0.10 - 0.48.  We choose 0.48 as our cut-off for 'non-analogue' distances in the database.
-
+**Figure X**.  *Distribution of squared-chord dissimilarity values.  The 95% confidence interval for the minumum spanning distance in the North American Modern Pollen Database is 0.10 - 0.48.  We choose 0.48 as our cut-off for 'non-analogue' distances in the database.*
 
 ```{r SiteMDS, fig.width=7, fig.height=6, fig.cap='Figure: North American site MDS scores'}
 
@@ -43,16 +67,29 @@ mds <- data.frame(pol.mds$points,
                   non.ana = factor(min.diss > 0.48))
 
 non.ana <- ggplot(data = mds, aes(x = X1, y = X2)) +
-  geom_point(alpha=0.5, size = 4, aes(color = non.ana)) +   
+  geom_point(data = mds[mds$non.ana == FALSE,], alpha=0.5, size = 2, color='black') +   
+  geom_point(data = mds[mds$non.ana == TRUE,], alpha=0.7, size = 4, color='red') +
   theme_bw() +
   xlab('MDS Axis One') + ylab('MDS Axis Two') +
   theme(text = element_text(size=24, family='serif'))
 
 non.ana.map <- ggplot(data = data.frame(map), aes(long, lat)) + 
   geom_path(aes(group=group), color='black') +
-  geom_point(data = data.frame(climate), 
-             aes(x = LONDD, y = LATDD, color = mds$non.ana)) +
-  coord_map(xlim=c(-170, -40), ylim=c(21, 83))
+  geom_point(data = data.frame(climate)[mds$non.ana == FALSE,], 
+             aes(x = LONDD, y = LATDD), alpha=0.5) +
+  geom_point(data = data.frame(climate)[mds$non.ana == TRUE,], 
+             aes(x = LONDD, y = LATDD), color = 'red') +
+   theme_bw() +
+  coord_map(projection='albers', lat0=30, lat1=50, xlim=c(-140, -60), ylim=c(26, 75))
 
+grid.arrange(non.ana, non.ana.map, ncol=2)
 
 ```
+**Figure 2**. *Location of non-analogue points in the modern pollen data, presented within a non-metric multidimensional scaling ordination (Panel 1) and geographically.  Interestingly, although a number of geographically isolated points exist in the dataset, the majority of non-analogue points exist within the most dense region of sampling, indicating that non-analogue sites are not ecologically stratified.*
+
+
+
+References
+=========================
+Bartlein, P. J., Harrison, S. P., Brewer, S., Connor, S., Davis, B. A. S., Gajewski, K., ... & Wu, H. (2011). Pollen-based continental climate reconstructions at 6 and 21 ka: a global synthesis. Climate Dynamics, 37(3-4), 775-802.
+Brewer, S., Guiot, J., Sánchez-Goñi, M. F., & Klotz, S. (2008). The climate in Europe during the Eemian: a multi-method approach using pollen data. Quaternary Science Reviews, 27(25), 2303-2315.

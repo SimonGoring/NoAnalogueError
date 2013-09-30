@@ -1,16 +1,21 @@
 library(snowfall)
 
-sfInit(parallel = TRUE, cpus = 4)
+sfInit(parallel = TRUE, cpus = 6)
 
 quantiles <- c(0, quantile(ecdf(diag.dist), c(seq(0, 0.2, by=0.001), seq(0.21, 1, by=0.01))))
 
 vals <- c(seq(0, 0.2, by=0.001), seq(0.21, 1, by=0.01))
 
-wapls.res <- list(mean_prediction  = matrix(ncol=length(vals), nrow=nrow(new.pol)),
-                  sample_size      = matrix(ncol=length(vals), nrow=nrow(new.pol)),
-                  bias             = matrix(ncol=length(vals), nrow=nrow(new.pol)),
-                  variance         = matrix(ncol=length(vals), nrow=nrow(new.pol)),
-                  expectation      = matrix(ncol=length(vals), nrow=nrow(new.pol)))
+if('wapls.res.RData' %in% list.files('data')){
+  load('data/wapls.res.RData')
+}
+if(!'wapls.res.RData' %in% list.files('data')){
+  wapls.res <- list(mean_prediction  = matrix(ncol=length(vals), nrow=nrow(new.pol)),
+                    sample_size      = matrix(ncol=length(vals), nrow=nrow(new.pol)),
+                    bias             = matrix(ncol=length(vals), nrow=nrow(new.pol)),
+                    variance         = matrix(ncol=length(vals), nrow=nrow(new.pol)),
+                    expectation      = matrix(ncol=length(vals), nrow=nrow(new.pol)))
+}
 
 i <- 1; j <- 1
 
@@ -78,7 +83,7 @@ for(i in 1:length(vals)){
       wapls.res$var[j, i]  <- mean((mean(prediction) - prediction)^2)
     }
     
-    cat('\n', j)  
+    #cat('\n', j)  
     
   }
     
