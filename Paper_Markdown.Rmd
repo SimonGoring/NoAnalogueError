@@ -105,13 +105,15 @@ load('data/wapls.res.RData')
 
 vals <- c(seq(0, 0.2, by=0.001), seq(0.21, 1, by=0.01))
 
-na.samples <- data.frame(size = as.vector(wa.res$sample_size),
+na.samples <- data.frame(site = rep(climate[,1], ncol(wa.res$bias)),
+                         size = as.vector(wa.res$sample_size),
                          distance = rep(vals, each = nrow(wa.res$sample_size)),
                          alpha.val = rep(diff(c(-.5,vals)), each = nrow(wa.res$sample_size))+0.005)
 
 na.samples <- na.samples[!is.na(na.samples$size),]
 
-ggplot(na.samples, aes(x=distance, y=size)) + geom_point(aes(alpha=alpha.val)) +
+ggplot(na.samples, aes(x=distance, y=size, group )) + 
+  geom_path(aes(alpha=alpha.val)) +
   xlab('Analogue Distance') + ylab('Available Samples') +
   theme(text = element_text(size=24, family='serif')) +
   theme_bw() +
