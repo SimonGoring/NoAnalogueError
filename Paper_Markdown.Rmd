@@ -30,7 +30,8 @@ map <- map_data('world')
 map <- subset(map, map$long > -170 & map$long < -30)
 map <- subset(map, map$lat > 20 & map$lat < 83)
 
-ggplot(data = data.frame(map), aes(long, lat)) + geom_path(aes(group=group), color='gray') +
+ggplot(data = data.frame(map), aes(long, lat)) + 
+  geom_polygon(aes(group=group), color='blue', alpha=0.2) +
   geom_point(data = data.frame(climate), aes(x = LONDD, y = LATDD), alpha = 0.5) +
   theme_bw() +
   xlab('') + ylab('') +
@@ -41,12 +42,19 @@ ggplot(data = data.frame(map), aes(long, lat)) + geom_path(aes(group=group), col
 **Figure 1**. Location of sample plots used for analysis.  Samples are derived from a modern pollen dataset.
 
 
-When we 
+Results
+=========================
+
+When we examine the dissimilarity scores we can see that the distribution between minimum, maximum and overall dissimilarities can be understood numerically and spatially.
+
 ```{r MinMaxDissim, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations'}
 
-dissim.scores <- data.frame(dissim = c(min.diss, max.diss, as.vector(dists)),
+dissim.scores <- data.frame(dissim = c(min.diss, 
+                                       max.diss, 
+                                       as.vector(dists)[sample(length(dists), 10000)]),
                             class   = c(rep('Minimum', length(min.diss)),
-                                        rep('Maximim', length(max.diss)), rep('All', length(as.vector(dists)))))
+                                        rep('Maximim', length(max.diss)), 
+                                        rep('All', 10000)))
               
 ggplot(dissim.scores) + 
   geom_density(aes(x = dissim, fill=class), alpha=0.5) +
@@ -56,6 +64,7 @@ ggplot(dissim.scores) +
   theme(text = element_text(size=24, family='serif'),
         strip.text = element_text(size=14, family='serif'),
         axis.text = element_text(size = 12, family='serif')) +
+  annotate("segment", x=0.48, xend = -.32, y = 0, yend = 1, size=3, color='red') +
   scale_x_log10() + scale_y_sqrt()
 
 ```
@@ -87,7 +96,59 @@ grid.arrange(non.ana, non.ana.map, ncol=2)
 ```
 **Figure 2**. *Location of non-analogue points in the modern pollen data, presented within a non-metric multidimensional scaling ordination (Panel 1) and geographically.  Interestingly, although a number of geographically isolated points exist in the dataset, the majority of non-analogue points exist within the most dense region of sampling, indicating that non-analogue sites are not ecologically stratified.*
 
+Model outputs
+=========================
+```{r LoadOutputs, echo=FALSE, message=FALSE, warning=FALSE}
+load('data/wa.res.RData')
+load('data/mat.res.RData')
+load('data/wapls.res.RData')
 
+vals <- c(seq(0, 0.2, by=0.001), seq(0.21, 1, by=0.01))
+
+na.samples <- data.frame(size = as.vector(wa.res$sample_size),
+                         distance = rep(vals, each = nrow(wa.res$sample_size)),
+                         alpha.val = rep(diff(c(-.5,vals)), each = nrow(wa.res$sample_size))+0.005)
+
+na.samples <- na.samples[!is.na(na.samples$size),]
+
+ggplot(na.samples, aes(x=distance, y=size)) + geom_point(aes(alpha=alpha.val)) +
+  xlab('Analogue Distance') + ylab('Available Samples') +
+  theme(text = element_text(size=24, family='serif')) +
+  theme_bw() +
+  scale_alpha_identity(guide='none')
+
+```
+**Figure X**. *As the analogue distance exclusion is increased the available data set size is reduced, although some points continue to maintain a large number of potential analogues, this is directly related to the minimum distance to the closest analogue.  Points that maintain a large pool of analogues are far from neighbours.*
+
+```{r PredictedValues, message=FALSE, echo=FALSE, warning=FALSE}
+
+load('data/mat.res.RData')
+load('data/wa.res.RData')
+load('data/wapls.res.RData')
+
+
+model.out <- data.frame(site   = rep(rep(climate[,1], ncol(mat.res$bias)),3),
+                        preds  = c(as.vector(mat.res$mean_prediction),
+                                   as.vector(wa.res$mean_prediction),
+                                   as.vector(wapls.res$mean_prediction)),
+                        dissim = rep(rep(vals, each=nrow(mat.res$bias)),3),
+                        model  = rep(c('MAT', 'WA', 'WAPLS'), each = length(mat.res$bias)))
+
+
+model.out <- model.out[!colSums(is.na(model.out)) > 0,]
+
+ggplot(model.out, aes(x = dissim, y = preds, group = site)) +
+  geom_path(alpha = 0.01) +
+  theme_bw() +
+  facet_wrap(~mode)
+  scale_x_continuous(expand=c(0,0)) +
+  annotate('segment', x=0, xend=1, 
+           y=mean(climate[,10], na.rm=TRUE),
+           yend=mean(climate[,10], na.rm=TRUE),
+           color='red', size=1.5, linetype=2)
+
+```
+**Figure X**.
 
 References
 =========================
