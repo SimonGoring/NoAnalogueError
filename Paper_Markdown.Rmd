@@ -17,7 +17,7 @@ Pollen assemblages are widely used for paleoclimatic reconstruction during the H
 
 Predicting climate from pollen in non-analogue space is likely to increase the uncertainty of models, possibly introduce systematic bias in predictions, and is likely to increase the variability of predictions across a time-series of predictions from a single site. However, high-quality terrestrial proxies for climate are important for understanding past climate change, and can act as a constraint on models of climate change in the past derived from GCMs in regions where little proxy data is available.  Thus, understanding the behaviour of pollen-based climate reconstructions in non-analogue space is an important first stem in understanding these reconstructions.
 
-Although we cannot know the values for temperature or 
+Although we cannot know the values for temperature or precipitation during this time, statistical non-analogues do exist in a modern context, and we can construct false non-analogues using a modified h-block sampling procedure 
 
 Methods:
 =========================
@@ -112,12 +112,11 @@ na.samples <- data.frame(site = rep(climate[,1], ncol(wa.res$bias)),
 
 na.samples <- na.samples[!is.na(na.samples$size),]
 
-ggplot(na.samples, aes(x=distance, y=size, group )) + 
-  geom_path(aes(alpha=alpha.val)) +
+ggplot(na.samples, aes(x=distance, y=size)) + 
+  geom_path(aes(group=site), alpha=0.001) +
   xlab('Analogue Distance') + ylab('Available Samples') +
   theme(text = element_text(size=24, family='serif')) +
-  theme_bw() +
-  scale_alpha_identity(guide='none')
+  theme_bw()
 
 ```
 **Figure X**. *As the analogue distance exclusion is increased the available data set size is reduced, although some points continue to maintain a large number of potential analogues, this is directly related to the minimum distance to the closest analogue.  Points that maintain a large pool of analogues are far from neighbours.*
@@ -127,7 +126,6 @@ ggplot(na.samples, aes(x=distance, y=size, group )) +
 load('data/mat.res.RData')
 load('data/wa.res.RData')
 load('data/wapls.res.RData')
-
 
 model.out <- data.frame(site   = rep(rep(climate[,1], ncol(mat.res$bias)),3),
                         preds  = c(as.vector(mat.res$mean_prediction),
@@ -142,15 +140,15 @@ model.out <- model.out[!colSums(is.na(model.out)) > 0,]
 ggplot(model.out, aes(x = dissim, y = preds, group = site)) +
   geom_path(alpha = 0.01) +
   theme_bw() +
-  facet_wrap(~mode)
-  scale_x_continuous(expand=c(0,0)) +
-  annotate('segment', x=0, xend=1, 
-           y=mean(climate[,10], na.rm=TRUE),
-           yend=mean(climate[,10], na.rm=TRUE),
-           color='red', size=1.5, linetype=2)
-
+  facet_wrap(~model, scales='free_y') +
+  scale_x_continuous(expand=c(0,0))
+  
 ```
-**Figure X**.
+**Figure X**. *Change in site predictions over time.  Of great interest is the difference between model outputs as the exclusion zone increases.  MAT can never predict beyond the extent of the data samples in the pool, and so as the exclusion zone increases the predictions move toward the dataset mean.  WAPLS uses an initial transformation and then regresses against it to predict new values, so as the exclusion zone increases we see an increase in the spread of the predicted values, with much greater variability and a loss of accuracy.*
+
+Discussion
+=========================
+What does this tell us about predicting climate in non-analogue space?
 
 References
 =========================

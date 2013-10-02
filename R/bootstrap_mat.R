@@ -1,10 +1,10 @@
 library(snowfall)
 
-sfInit(parallel = TRUE, cpus = 4)
+sfInit(parallel = TRUE, cpus = 3)
 
 # Find the quantiles & set up the analogue distance values:
 quantiles <- c(0, quantile(ecdf(diag.dist), c(seq(0, 0.2, by=0.001), seq(0.21, 1, by=0.01))))
-vals <- c(seq(0, 0.2, by=0.001), seq(0.21, 1, by=0.01))
+vals <- c(seq(0, 1, by=0.01))
 
 mat.res <- list(mean_prediction  = matrix(ncol=length(vals), nrow=nrow(new.pol)),
                 sample_size      = matrix(ncol=length(vals), nrow=nrow(new.pol)),
@@ -61,7 +61,7 @@ sfExport(list = list('mat.fun'))
 sfExport(list = list('new.pol'))
 sfExport(list = list('climate'))
 
-for(i in i:length(vals)){
+for(i in 1:length(vals)){
   #  At each quantile, figure out which samples should be acceptable for a calibration set targeting
   #  each sample return 'keep.pol'
   keep.pol <- aaply(diag.dist, 1, 
@@ -70,7 +70,7 @@ for(i in i:length(vals)){
 
   diag(keep.pol) <- FALSE
   
-  if(any(is.na(mat.res$prediction[,i]))){
+  if(any(is.na(mat.res$mean_prediction[,i]))){
     fast.mat <- laply(1:nrow(diag.dist), fmat, .progress = "text")
     rmse <- aaply(fast.mat, 2, function(x) sqrt(mean((x - climate[,10])^2, na.rm = T)))
   }
@@ -86,8 +86,8 @@ for(i in i:length(vals)){
       mat.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
       mat.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
       mat.res$bias[j, i] <- (climate[j,10] - mean(prediction, na.rm=TRUE))^2
-      mat.res$exp[j, i]  <- mean((climate[j,10] - prediction)^2, na.rm=TRUE)
-      mat.res$var[j, i]  <- mean((mean(prediction, na.rm=TRUE) - prediction)^2, na.rm=TRUE)
+      mat.res$expectation[j, i]  <- mean((climate[j,10] - prediction)^2, na.rm=TRUE)
+      mat.res$variance[j, i]  <- mean((mean(prediction, na.rm=TRUE) - prediction)^2, na.rm=TRUE)
     }
     
     cat('\n', j)  
@@ -98,9 +98,3 @@ for(i in i:length(vals)){
   cat('\n', i)
 }
 
-par(mfrow=c(2, 1))
-plot(quantiles[-282], mat.res$mean_prediction[1,], ylim = range(mat.res$mean_prediction, na.rm=TRUE), type='l', col=rgb(0.1, 0.1, 0.1,0.1))
-for(i in 1:2289)lines(quantiles[-282], mat.res$mean_prediction[i,], col=rgb(0.1, 0.1, 0.1,0.01))
-rug(x = clim)
-plot(quantiles[-282], wa.res$mean_prediction[1,], ylim = range(wa.res$mean_prediction, na.rm=TRUE), type='l', col=rgb(0.1, 0.1, 0.1,0.1))
-for(i in 1:2289)lines(quantiles[-282], wa.res$mean_prediction[i,], col=rgb(0.1, 0.1, 0.1,0.01))
