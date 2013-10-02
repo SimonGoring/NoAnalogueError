@@ -89,7 +89,7 @@ for(i in i:length(vals)){
       mat.res$variance[j, i]  <- mean((mean(prediction, na.rm=TRUE) - prediction)^2, na.rm=TRUE)
     }
     
-    cat('\n', j)  
+#    cat('\n', j)  
     
   }
     
