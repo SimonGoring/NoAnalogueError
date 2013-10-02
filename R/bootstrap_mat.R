@@ -61,12 +61,11 @@ sfExport(list = list('mat.fun'))
 sfExport(list = list('new.pol'))
 sfExport(list = list('climate'))
 
-for(i in 1:length(vals)){
+for(i in i:length(vals)){
   #  At each quantile, figure out which samples should be acceptable for a calibration set targeting
   #  each sample return 'keep.pol'
   keep.pol <- aaply(diag.dist, 1, 
-                    function(x) {x > quantiles[i]}, 
-                    .progress = "text")
+                    function(x) {x > quantiles[i]})
 
   diag(keep.pol) <- FALSE
   

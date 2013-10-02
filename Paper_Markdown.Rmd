@@ -17,7 +17,7 @@ Pollen assemblages are widely used for paleoclimatic reconstruction during the H
 
 Predicting climate from pollen in non-analogue space is likely to increase the uncertainty of models, possibly introduce systematic bias in predictions, and is likely to increase the variability of predictions across a time-series of predictions from a single site. However, high-quality terrestrial proxies for climate are important for understanding past climate change, and can act as a constraint on models of climate change in the past derived from GCMs in regions where little proxy data is available.  Thus, understanding the behaviour of pollen-based climate reconstructions in non-analogue space is an important first stem in understanding these reconstructions.
 
-Although we cannot know the values for temperature or precipitation during this time, statistical non-analogues do exist in a modern context, and we can construct false non-analogues using a modified h-block sampling procedure 
+Although we cannot know the values for temperature or precipitation during this time, statistical non-analogues do exist in a modern context, and we can construct false non-analogues using a modified h-block sampling procedure (e.g., Telford & Birks) that examines analogue distance rather than geographical distance.
 
 Methods:
 =========================
