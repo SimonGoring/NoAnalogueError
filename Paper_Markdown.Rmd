@@ -4,7 +4,7 @@ Non-analogues in paleoecological reconstruction - the effects of analogue distan
 **Abstract**
 Some jibberish.
 
-```{r}
+```{r LoadData, echo=FALSE, warning=FALSE, message=FALSE}
 library(gridExtra)
 
 source('R/data_setup.R')
@@ -17,20 +17,21 @@ Pollen assemblages are widely used for paleoclimatic reconstruction during the H
 
 Predicting climate from pollen in non-analogue space is likely to increase the uncertainty of models, possibly introduce systematic bias in predictions, and is likely to increase the variability of predictions across a time-series of predictions from a single site. However, high-quality terrestrial proxies for climate are important for understanding past climate change, and can act as a constraint on models of climate change in the past derived from GCMs in regions where little proxy data is available.  Thus, understanding the behaviour of pollen-based climate reconstructions in non-analogue space is an important first stem in understanding these reconstructions.
 
-Although we cannot know the values for temperature or 
+Although we cannot know the values for temperature or precipitation during this time, statistical non-analogues do exist in a modern context, and we can construct false non-analogues using a modified h-block sampling procedure (e.g., Telford & Birks) that examines analogue distance rather than geographical distance.
 
 Methods:
 =========================
 
 Sites from across North America were used to build a modern analogue dataset.
 
-```{r SiteLocations, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations'}
+```{r SiteLocations, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations', echo=FALSE, message=FALSE, warning=FALSE}
 map <- map_data('world')
 
 map <- subset(map, map$long > -170 & map$long < -30)
 map <- subset(map, map$lat > 20 & map$lat < 83)
 
-ggplot(data = data.frame(map), aes(long, lat)) + geom_path(aes(group=group), color='gray') +
+ggplot(data = data.frame(map), aes(long, lat)) + 
+  geom_polygon(aes(group=group), color='blue', alpha=0.2) +
   geom_point(data = data.frame(climate), aes(x = LONDD, y = LATDD), alpha = 0.5) +
   theme_bw() +
   xlab('') + ylab('') +
@@ -41,12 +42,19 @@ ggplot(data = data.frame(map), aes(long, lat)) + geom_path(aes(group=group), col
 **Figure 1**. Location of sample plots used for analysis.  Samples are derived from a modern pollen dataset.
 
 
-When we 
-```{r MinMaxDissim, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations'}
+Results
+=========================
 
-dissim.scores <- data.frame(dissim = c(min.diss, max.diss, as.vector(dists)),
+When we examine the dissimilarity scores we can see that the distribution between minimum, maximum and overall dissimilarities can be understood numerically and spatially.
+
+```{r MinMaxDissim, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations', echo=FALSE, message=FALSE, warning=FALSE}
+
+dissim.scores <- data.frame(dissim = c(min.diss, 
+                                       max.diss, 
+                                       as.vector(dists)[sample(length(dists), 10000)]),
                             class   = c(rep('Minimum', length(min.diss)),
-                                        rep('Maximim', length(max.diss)), rep('All', length(as.vector(dists)))))
+                                        rep('Maximim', length(max.diss)), 
+                                        rep('All', 10000)))
               
 ggplot(dissim.scores) + 
   geom_density(aes(x = dissim, fill=class), alpha=0.5) +
@@ -56,12 +64,13 @@ ggplot(dissim.scores) +
   theme(text = element_text(size=24, family='serif'),
         strip.text = element_text(size=14, family='serif'),
         axis.text = element_text(size = 12, family='serif')) +
+  annotate("segment", x=0.48, xend = -.32, y = 0, yend = 1, size=3, color='red') +
   scale_x_log10() + scale_y_sqrt()
 
 ```
-**Figure X**.  *Distribution of squared-chord dissimilarity values.  The 95% confidence interval for the minumum spanning distance in the North American Modern Pollen Database is 0.10 - 0.48.  We choose 0.48 as our cut-off for 'non-analogue' distances in the database.*
+**Figure 2**.  *Distribution of squared-chord dissimilarity values.  The 95% confidence interval for the minumum spanning distance in the North American Modern Pollen Database is 0.10 - 0.48.  We choose 0.48 as our cut-off for 'non-analogue' distances in the database.*
 
-```{r SiteMDS, fig.width=7, fig.height=6, fig.cap='Figure: North American site MDS scores'}
+```{r SiteMDS, fig.width=7, fig.height=6, fig.cap='Figure: North American site MDS scores', echo=FALSE, message=FALSE, warning=FALSE}
 
 mds <- data.frame(pol.mds$points,
                   non.ana = factor(min.diss > 0.48))
@@ -85,9 +94,126 @@ non.ana.map <- ggplot(data = data.frame(map), aes(long, lat)) +
 grid.arrange(non.ana, non.ana.map, ncol=2)
 
 ```
-**Figure 2**. *Location of non-analogue points in the modern pollen data, presented within a non-metric multidimensional scaling ordination (Panel 1) and geographically.  Interestingly, although a number of geographically isolated points exist in the dataset, the majority of non-analogue points exist within the most dense region of sampling, indicating that non-analogue sites are not ecologically stratified.*
+**Figure 3**. *Location of non-analogue points in the modern pollen data, presented within a non-metric multidimensional scaling ordination (Panel 1) and geographically.  Interestingly, although a number of geographically isolated points exist in the dataset, the majority of non-analogue points exist within the most dense region of sampling, indicating that non-analogue sites are not ecologically stratified.*
 
+Climate Variables
+=========================
 
+We used the `r nrow(climate)` records from the North American Modern Pollen Database and associated climate data to provide reconstructions of key climatic variables. The process of calculating the lambda/lambda ratio from RDA (ref) produces interesting relationships, perhaps impacted by the breadth of the available climate and pollen data across North America.
+
+```{r message=FALSE, warning=FALSE}
+
+#  Sakari, can you take a look at this and let me know what you think?  Am I doing this right, and what do you make of these results?  Are we simply using too large a dataset?
+
+pol <- mod_pol[,7:ncol(mod_pol)]
+clim <- climate[,4:ncol(climate)]
+
+clim.ratio <- rep(NA, ncol(clim))
+
+for(i in 1:ncol(clim)){
+  test.struct <- rda(pol ~ clim[,i])
+  clim.ratio[i] <- test.struct$CCA$tot.chi / test.struct$CA$tot.chi
+}
+
+names(clim.ratio) <- colnames(clim)
+best.clim <- round(clim.ratio[order(clim.ratio, decreasing = TRUE)]*100, 0)
+
+```
+
+Variable | Percent Variability
+-------- | -------------------
+`r names(best.clim)[1]` | `r best.clim[1]`
+`r names(best.clim)[2]` | `r best.clim[2]`
+`r names(best.clim)[3]` | `r best.clim[3]`
+`r names(best.clim)[4]` | `r best.clim[4]`
+`r names(best.clim)[5]` | `r best.clim[5]`
+`r names(best.clim)[6]` | `r best.clim[6]`
+`r names(best.clim)[7]` | `r best.clim[7]`
+
+Key variables based on the $latex \frac {\lambda_1} {\lambda_2} $ using pCCA appear to be climate variables relating to mean monthly percent summer sunshine (variables preceded by an 's').  These variables are likely to be variables that are combinations of temperature and preciptiation variables, however this value is not linear, nor is it continuous, meaning that .  While Telford & Birks (2009) have criticised sunshine reconstructions (Freshette et al., 2008) in the past (and perhaps with good reason), the strength of the sunshine signal in the climate data is worth noting, but the limitations of CCA may impact our ability to detect and accurately assess its importance.
+
+Model outputs
+=========================
+
+Once the climate variables of interest were established we began by bootstrapping the models for these climate variables.  From the total pool of samples we generate a calibration dataset by sampling with replacement.  
+
+```{r LoadOutputs, echo=FALSE, message=FALSE, warning=FALSE}
+load('data/wa.res.RData')
+load('data/mat.res.RData')
+load('data/wapls.res.RData')
+
+vals <- c(seq(0, 0.2, by=0.001), seq(0.21, 1, by=0.01))
+
+na.samples <- data.frame(site = rep(climate[,1], ncol(mat.res$bias)),
+                         size = as.vector(mat.res$sample_size),
+                         distance = rep(seq(0, 1, by=0.01), each = nrow(mat.res$sample_size)))
+
+na.samples <- na.samples[!is.na(na.samples$size),]
+
+loss <- ggplot(na.samples, aes(x=distance, y=size)) + 
+  geom_path(aes(group=site), alpha=0.01) +
+  xlab('Analogue Distance') + ylab('Available Samples') +
+  theme_bw() +
+  theme(text = element_text(size=24, family='serif'),
+        axis.text = element_text(size=14, family='serif')) +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_y_continuous(expand=c(0,0)) +
+  geom_segment(aes(x=0.48, xend = 0.48, y = min(mat.res$sample_size, na.rm=TRUE), yend = nrow(climate)), size=1, color='red', linetype=2)
+  
+loc.loss <- data.frame(lat =  climate$LATDD,
+                       long = climate$LONDD,
+                       loss = 1 - mat.res$sample_size[,49] / nrow(climate))
+
+loss.map <-  ggplot(data = data.frame(map), aes(long, lat)) + 
+  geom_path(aes(group=group), color='black') +
+  geom_point(data = loc.loss, 
+             aes(x = long, y = lat, color = loss), alpha=0.5) +
+   theme_bw() +
+  theme(text = element_text(size=24, family='serif'),
+        axis.text = element_text(size=14, family='serif')) +
+  coord_map(projection='albers', lat0=30, lat1=50, xlim=c(-140, -60), ylim=c(26, 75)) +
+  scale_color_continuous(low = '#F08080', high='#4169E1') +
+  xlab('') + ylab('')
+
+grid.arrange(loss, loss.map, ncol=2)
+
+```
+**Figure X**. *As the analogue distance exclusion is increased the available data set size is reduced, although some points continue to maintain a large number of potential analogues, this is directly related to the minimum distance to the closest analogue.  Points that maintain a large pool of analogues are far from neighbours.*
+
+```{r PredictedValues, message=FALSE, echo=FALSE, warning=FALSE}
+
+mat.df <- data.frame(site = rep(climate[,1], ncol(mat.res$bias)),
+                     preds = as.vector(mat.res$mean_prediction),
+                     dissim = rep(seq(0, 1, by=0.01),each = nrow(clim)),
+                     model = 'MAT', 
+                     init = rep(climate[,10], ncol(mat.res$bias)))
+
+model.out <- data.frame(site   = rep(rep(climate[,1], ncol(wa.res$bias)),2),
+                        preds  = c(as.vector(wa.res$mean_prediction),
+                                   as.vector(wapls.res$mean_prediction)),
+                        dissim = rep(rep(vals, each=nrow(wa.res$bias)),2),
+                        model  = rep(c('WA', 'WAPLS'), each = length(wa.res$bias)),
+                        init = rep(climate[,10], ncol(wa.res$bias)))
+
+#  Temporary fix until we re-run wa.re and wapls.res
+model.out <- rbind(mat.df, model.out)
+model.out <- model.out[!colSums(is.na(model.out)) > 0,]
+
+#  This plot takes a really long time to plot.
+
+ggplot(model.out, aes(x = dissim, y = preds, group = site, color = init)) +
+  geom_path(alpha = 0.05) +
+  theme_bw() +
+  facet_wrap(~model, scales='free_y') +
+  scale_x_continuous(expand=c(0,0)) +
+  scale_color_continuous(low='#F08080', high='#4169E1')
+
+```
+**Figure X**. *Change in site predictions over time.  Of great interest is the difference between model outputs as the exclusion zone increases.  MAT can never predict beyond the extent of the data samples in the pool, and so as the exclusion zone increases the predictions move toward the dataset mean.  WAPLS uses an initial transformation and then regresses against it to predict new values, so as the exclusion zone increases we see an increase in the spread of the predicted values, with much greater variability and a loss of accuracy.*
+
+Discussion
+=========================
+What does this tell us about predicting climate in non-analogue space?
 
 References
 =========================

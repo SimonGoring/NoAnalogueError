@@ -9,8 +9,8 @@ vals <- c(seq(0, 0.2, by=0.001), seq(0.21, 1, by=0.01))
 wa.res <- list(mean_prediction  = matrix(ncol=length(vals), nrow=nrow(new.pol)),
                sample_size      = matrix(ncol=length(vals), nrow=nrow(new.pol)),
                bias             = matrix(ncol=length(vals), nrow=nrow(new.pol)),
-               variance         = matrix(ncol=length(vals), nrow=nrow(new.pol)),
-               expectation      = matrix(ncol=length(vals), nrow=nrow(new.pol)))
+               var              = matrix(ncol=length(vals), nrow=nrow(new.pol)),
+               exp              = matrix(ncol=length(vals), nrow=nrow(new.pol)))
 
 if('wa.res.RData' %in% list.files('data/')) {
   load('data/wa.res.RData')
@@ -25,7 +25,7 @@ subset.pol <- function(set){
   zeros <- colSums(new.pol[calib.samples,], na.rm = TRUE) == 0
   
   list(calib.pol  = new.pol[calib.samples,!zeros],
-       calib.clim = climate[calib.samples,4],
+       calib.clim = climate[calib.samples,10],
        zeros = zeros)
 
 }
@@ -95,5 +95,3 @@ for(i in i:length(vals)){
     }
   }
 }
-
-
