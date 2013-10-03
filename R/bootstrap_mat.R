@@ -4,7 +4,7 @@ sfInit(parallel = TRUE, cpus = 3)
 
 # Find the quantiles & set up the analogue distance values:
 quantiles <- c(0, quantile(ecdf(diag.dist), c(seq(0, 0.2, by=0.001), seq(0.21, 1, by=0.01))))
-vals <- c(seq(0, 1, by=0.01))
+vals <- seq(0, 1, by=0.01)
 
 mat.res <- list(mean_prediction  = matrix(ncol=length(vals), nrow=nrow(new.pol)),
                 sample_size      = matrix(ncol=length(vals), nrow=nrow(new.pol)),
