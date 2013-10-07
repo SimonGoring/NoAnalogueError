@@ -1,9 +1,11 @@
 library(snowfall)
 
+sfStop()
 sfInit(parallel = TRUE, cpus = 6)
 
-quantiles <- c(0, quantile(ecdf(diag.dist), c(seq(0, 0.2, by=0.001), seq(0.21, 1, by=0.01))))
-
+# Set up the analogue distance exclusion values.
+#  This was originally a set of quantiles, but it played havoc on plotting and
+#  didn't seem to add much to the understanding of what was going on.
 vals <- c(seq(0, 0.2, by=0.001), seq(0.21, 1, by=0.01))
 
 if('wapls.res.RData' %in% list.files('data')){
@@ -64,8 +66,7 @@ sfLibrary(rioja)
 for(i in 1:length(vals)){
   #  This runs through each analogue distance
   keep.pol <- aaply(diag.dist, 1, 
-                    function(x) {x > quantiles[i]}, 
-                    .progress = "text")
+                    function(x) {x > vals[i]})
   diag(keep.pol) <- FALSE
   
   sfExport(list = list('keep.pol'))
@@ -83,12 +84,10 @@ for(i in 1:length(vals)){
       wapls.res$var[j, i]  <- mean((mean(prediction) - prediction)^2)
     }
     
-    #cat('\n', j)  
-    
   }
     
   save(wapls.res, file = 'data/wapls.res.RData')
-  cat('\n', i)
+  cat(i)
 }
 
   

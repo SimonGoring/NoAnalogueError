@@ -1,9 +1,11 @@
 library(snowfall)
 
+sfStop()
 sfInit(parallel = TRUE, cpus = 3)
 
-# Find the quantiles & set up the analogue distance values:
-quantiles <- c(0, quantile(ecdf(diag.dist), c(seq(0, 0.2, by=0.001), seq(0.21, 1, by=0.01))))
+# Set up the analogue distance exclusion values.
+#  This was originally a set of quantiles, but it played havoc on plotting and
+#  didn't seem to add much to the understanding of what was going on.
 vals <- seq(0, 1, by=0.01)
 
 mat.res <- list(mean_prediction  = matrix(ncol=length(vals), nrow=nrow(new.pol)),
@@ -65,12 +67,12 @@ for(i in i:length(vals)){
   #  At each quantile, figure out which samples should be acceptable for a calibration set targeting
   #  each sample return 'keep.pol'
   keep.pol <- aaply(diag.dist, 1, 
-                    function(x) {x > quantiles[i]})
+                    function(x) {x > vals[i]})
 
   diag(keep.pol) <- FALSE
   
   if(any(is.na(mat.res$mean_prediction[,i]))){
-    fast.mat <- laply(1:nrow(diag.dist), fmat, .progress = "text")
+    fast.mat <- laply(1:nrow(diag.dist), fmat)
     rmse <- aaply(fast.mat, 2, function(x) sqrt(mean((x - climate[,10])^2, na.rm = T)))
   }
   
@@ -88,12 +90,11 @@ for(i in i:length(vals)){
       mat.res$expectation[j, i]  <- mean((climate[j,10] - prediction)^2, na.rm=TRUE)
       mat.res$variance[j, i]  <- mean((mean(prediction, na.rm=TRUE) - prediction)^2, na.rm=TRUE)
     }
-    
-#    cat('\n', j)  
+
     
   }
     
   save(mat.res, file = 'data/mat.res.RData')
-  cat('\n', i)
+  cat(i)
 }
 

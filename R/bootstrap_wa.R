@@ -1,9 +1,11 @@
 library(snowfall)
 
+sfStop()
 sfInit(parallel = TRUE, cpus = 6)
 
-quantiles <- c(0, quantile(ecdf(diag.dist), c(seq(0, 0.2, by=0.001), seq(0.21, 1, by=0.01))))
-
+# Set up the analogue distance exclusion values.
+#  This was originally a set of quantiles, but it played havoc on plotting and
+#  didn't seem to add much to the understanding of what was going on.
 vals <- seq(0, 1, by=0.01)
 
 wa.res <- list(mean_prediction  = matrix(ncol=length(vals), nrow=nrow(new.pol)),
@@ -66,8 +68,7 @@ sfLibrary(analogue)
 for(i in i:length(vals)){
   #  This runs through each analogue distance
   keep.pol <- aaply(diag.dist, 1, 
-                    function(x) {x > quantiles[i]}, 
-                    .progress = "text")
+                    function(x) {x > vals[i]})
 
   sfExport(list = list('keep.pol'))
   
@@ -85,13 +86,14 @@ for(i in i:length(vals)){
       wa.res$expectation[j, i]  <- mean((climate[j,4] - prediction)^2, na.rm=TRUE)
       wa.res$variance[j, i]  <- mean((mean(prediction, na.rm=TRUE) - prediction)^2, na.rm=TRUE)
     }
-    
-    cat('\n', i, j)  
-    
+        
   }
   if(ncol(wa.res$bias) > i){
     if(!sum(is.na(wa.res$bias[,i+1])) == 0){
       save(wa.res, file = 'data/wa.res.RData')
     }
   }
+  
+  cat(i)  
+  
 }
