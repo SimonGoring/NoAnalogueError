@@ -4,13 +4,13 @@ sfInit(parallel = TRUE, cpus = 6)
 
 quantiles <- c(0, quantile(ecdf(diag.dist), c(seq(0, 0.2, by=0.001), seq(0.21, 1, by=0.01))))
 
-vals <- c(seq(0, 0.2, by=0.001), seq(0.21, 1, by=0.01))
+vals <- seq(0, 1, by=0.01)
 
 wa.res <- list(mean_prediction  = matrix(ncol=length(vals), nrow=nrow(new.pol)),
                sample_size      = matrix(ncol=length(vals), nrow=nrow(new.pol)),
                bias             = matrix(ncol=length(vals), nrow=nrow(new.pol)),
-               var              = matrix(ncol=length(vals), nrow=nrow(new.pol)),
-               exp              = matrix(ncol=length(vals), nrow=nrow(new.pol)))
+               variance         = matrix(ncol=length(vals), nrow=nrow(new.pol)),
+               expectation      = matrix(ncol=length(vals), nrow=nrow(new.pol)))
 
 if('wa.res.RData' %in% list.files('data/')) {
   load('data/wa.res.RData')
@@ -82,8 +82,8 @@ for(i in i:length(vals)){
       wa.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
       wa.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
       wa.res$bias[j, i] <- (climate[j,4] - mean(prediction, na.rm=TRUE))^2
-      wa.res$exp[j, i]  <- mean((climate[j,4] - prediction)^2, na.rm=TRUE)
-      wa.res$var[j, i]  <- mean((mean(prediction, na.rm=TRUE) - prediction)^2, na.rm=TRUE)
+      wa.res$expectation[j, i]  <- mean((climate[j,4] - prediction)^2, na.rm=TRUE)
+      wa.res$variance[j, i]  <- mean((mean(prediction, na.rm=TRUE) - prediction)^2, na.rm=TRUE)
     }
     
     cat('\n', i, j)  
