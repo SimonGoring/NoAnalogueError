@@ -6,7 +6,7 @@ sfInit(parallel = TRUE, cpus = 6)
 # Set up the analogue distance exclusion values.
 #  This was originally a set of quantiles, but it played havoc on plotting and
 #  didn't seem to add much to the understanding of what was going on.
-vals <- c(seq(0, 0.2, by=0.001), seq(0.21, 1, by=0.01))
+vals <- c(seq(0, 1, by=0.01))
 
 if('wapls.res.RData' %in% list.files('data')){
   load('data/wapls.res.RData')

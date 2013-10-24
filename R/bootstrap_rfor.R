@@ -60,33 +60,33 @@ sfExport(list = list('subset.pol'))
 sfExport(list = list('climate'))
 sfLibrary(randomForest)
 
+longlist <- expand.grid(x=1:length(vals), y = 1:nrow(new.pol))
 
-for(i in 1:length(vals)){
+samp <- sample(231189)
+
+for(k in samp){
   #  This runs through each analogue distance
+  
+  i <- longlist[k,1]
+  j <- longlist[k,2]
+  
   keep.pol <- aaply(diag.dist, 1, 
                     function(x) {x > vals[i]})
   diag(keep.pol) <- FALSE
   
   sfExport(list = list('keep.pol'))
+    
+  if(is.na(rfor.res$mean_prediction[j,i])){
+    #  Run randomForest with raw defaults
+    prediction <- unlist(sfLapply(rep(j, 100), fun = rfor.run))
   
-  for(j in 1:nrow(new.pol)){
-    
-    if(is.na(rfor.res$mean_prediction[j,i])){
-      #  Run WA with monotonic deshrinking.
-      prediction <- unlist(sfLapply(rep(j, 100), fun = rfor.run))
-    
-      rfor.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
-      rfor.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
-      rfor.res$bias[j, i] <- (climate[j,10] - mean(prediction, na.rm=TRUE))^2
-      rfor.res$expectation[j, i]  <- mean((climate[j,10] - prediction)^2)
-      rfor.res$variance[j, i]  <- mean((mean(prediction) - prediction)^2)
-    }
-
-    
+    rfor.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
+    rfor.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
+    rfor.res$bias[j, i] <- (climate[j,10] - mean(prediction, na.rm=TRUE))^2
+    rfor.res$expectation[j, i]  <- mean((climate[j,10] - prediction)^2)
+    rfor.res$variance[j, i]  <- mean((mean(prediction) - prediction)^2)
   }
-    
-  save(rfor.res, file = 'data/rfor.res.RData')
-  cat(i)
-}
 
-  
+  save(rfor.res, file = 'data/rfor.res.RData')
+  cat(round(which(k==samp)/length(samp) * 100, 4), '% at', Sys.time())
+}
