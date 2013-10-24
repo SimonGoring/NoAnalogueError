@@ -1,5 +1,6 @@
 
 #  Run all bootstraps:
+source('R/data_setup.R')
 
 source('R/bootstrap_mat.R')
 cat('Done MAT/n')
