@@ -62,7 +62,7 @@ sfLibrary(randomForest)
 
 longlist <- expand.grid(x=1:length(vals), y = 1:nrow(new.pol))
 
-samp <- sample(231189)
+samp <- sample(nrow(longlist))
 
 for(k in samp){
   #  This runs through each analogue distance
@@ -88,5 +88,5 @@ for(k in samp){
   }
 
   save(rfor.res, file = 'data/rfor.res.RData')
-  cat(round(which(k==samp)/length(samp) * 100, 4), '% at', Sys.time())
+  cat(round(which(k==samp)/length(samp) * 100, 4), '% at', as.character(Sys.time()), '\n')
 }
