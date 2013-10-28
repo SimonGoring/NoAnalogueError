@@ -78,7 +78,7 @@ for(k in samp){
     
   if(is.na(rfor.res$mean_prediction[j,i])){
     #  Run randomForest with raw defaults
-    prediction <- unlist(sfLapply(rep(j, 100), fun = rfor.run))
+    prediction <- unlist(sfLapply(rep(j, 50), fun = rfor.run))
   
     rfor.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
     rfor.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
