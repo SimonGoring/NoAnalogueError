@@ -10,4 +10,3 @@ source('R/bootstrap_wapls.R')
 cat('Done WAPLS/n')
 source('R/bootstrap_rfor.R')
 cat('Done rFor/n')
-
