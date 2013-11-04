@@ -62,7 +62,8 @@ sfLibrary(randomForest)
 
 longlist <- expand.grid(x=1:length(vals), y = 1:nrow(new.pol))
 
-samp <- sample(nrow(longlist))
+samp <- sample(nrow(longlist), 
+               prob = rep(rowSums(is.na(rfor.res$bias))/length(vals), each = length(vals)))
 
 for(k in samp){
   #  This runs through each analogue distance
