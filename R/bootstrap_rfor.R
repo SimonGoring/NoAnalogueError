@@ -92,8 +92,8 @@ for(k in samp){
   #  This runs through each analogue distance
   run.start <- proc.time()
   
-  i <- longlist[k,1]
-  j <- longlist[k,2]
+  i <- longlist[k,2]
+  j <- longlist[k,1]
   
   keep.pol <- aaply(diag.dist, 1, 
                     function(x) {x > vals[i]})
