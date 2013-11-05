@@ -60,13 +60,37 @@ sfExport(list = list('subset.pol'))
 sfExport(list = list('climate'))
 sfLibrary(randomForest)
 
-longlist <- expand.grid(x=1:length(vals), y = 1:nrow(new.pol))
+#  Create a set of all possible xy pairs in the rfor tables, and then look to see if
+#  they've been sampled yet.
+longlist <- expand.grid(row = 1:nrow(new.pol), col=1:length(vals))
+longlist <- data.frame(longlist, calc = is.na(as.vector(rfor.res$bias)))
 
+#  Now to sample in an efficient way:  This expanded grid gives the probability
+#  that a cell is NA in a row or in a column.  If we multiply them together then
+#  we get a vector of values for each cell that gives its importance in terms of
+#  sampling, with higher values indicating lower rates of sampling in the row/column
+#  pair.
+prob.vec <- expand.grid(row = rowSums(is.na(rfor.res$bias))/length(vals),
+						col = colSums(is.na(rfor.res$bias))/nrow(new.pol))
+
+prob.vec <- prob.vec[,1] * prob.vec[,2]
+#  Just to get it to range from ~0 - 1
+prob.vec <- (prob.vec - min(prob.vec) + 0.001) / max(prob.vec - min(prob.vec) + 0.01)
+
+#  A simple t-test shows that NA cells have a mean sampling probability of 0.58 and
+#  already sampled cells have a probability of 0.49.  We're going to drop already
+#  sampled cells anyway, but it helps support our decision to sample this way.
+
+#  Re-order, based on the probability vector defined above:						
 samp <- sample(nrow(longlist), 
-               prob = rep(rowSums(is.na(rfor.res$bias))/length(vals), each = length(vals)))
+               prob = prob.vec)
+
+longlist <- longlist[samp,]
+longlist <- longlist[longlist[,3],]
 
 for(k in samp){
   #  This runs through each analogue distance
+  run.start <- proc.time()
   
   i <- longlist[k,1]
   j <- longlist[k,2]
@@ -89,5 +113,13 @@ for(k in samp){
   }
 
   save(rfor.res, file = 'data/rfor.res.RData')
-  cat(round(which(k==samp)/length(samp) * 100, 4), '% at', as.character(Sys.time()), '\n')
+  
+  end.time <- proc.time()
+  
+  st <- Sys.time()
+  
+  cat(round(sum(!is.na(rfor.res$bias))/length(rfor.res$bias) * 100, 4), '% done on', 
+      weekdays(st), format(st, '%d'), months(st), format(st, '%Y'),
+      'at', format(st, '%H:%M'),
+      'in', (end.time - run.time)[3], 'seconds.\n')
 }
