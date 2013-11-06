@@ -90,7 +90,7 @@ longlist <- longlist[longlist[,3],]
 
 for(k in samp){
   #  This runs through each analogue distance
-  run.start <- proc.time()
+  run.time <- proc.time()
   
   i <- longlist[k,2]
   j <- longlist[k,1]
@@ -121,5 +121,5 @@ for(k in samp){
   cat(round(sum(!is.na(rfor.res$bias))/length(rfor.res$bias) * 100, 4), '% done on', 
       weekdays(st), format(st, '%d'), months(st), format(st, '%Y'),
       'at', format(st, '%H:%M'),
-      'in', round((end.time - run.time)[3]/6000, 1), 'minutes.\n')
+      'in', round((end.time - run.time)[3]/60, 1), 'minutes.\n')
 }
