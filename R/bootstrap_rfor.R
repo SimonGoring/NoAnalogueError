@@ -121,5 +121,5 @@ for(k in samp){
   cat(round(sum(!is.na(rfor.res$bias))/length(rfor.res$bias) * 100, 4), '% done on', 
       weekdays(st), format(st, '%d'), months(st), format(st, '%Y'),
       'at', format(st, '%H:%M'),
-      'in', (end.time - run.time)[3], 'seconds.\n')
+      'in', round((end.time - run.time)[3]/6000, 1), 'minutes.\n')
 }
