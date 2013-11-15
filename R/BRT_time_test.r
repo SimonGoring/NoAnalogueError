@@ -39,9 +39,9 @@ for (i in 1:23) {
       test_set <- cal_data[test_samples[i],4:59]
       attach (test_set, warn.conflicts = FALSE)
       pred <- predict(xval_model,test_set,xval_best_iter, type="response") # Predicts for the test-set sample
-	  iter_end_time <- Sys.time()
-	  print(paste("Sample ",test_samples[i]," (",i,"/23), bootstrap cycle ",j,"/50, predicted value ",pred,".", sep=""))
-	  print (iter_end_time - iter_start_time)
+      iter_end_time <- Sys.time()
+      print(paste("Sample ",test_samples[i]," (",i,"/23), bootstrap cycle ",j,"/50, predicted value ",pred,".", sep=""))
+      print (iter_end_time - iter_start_time)
 	  
    }
    
