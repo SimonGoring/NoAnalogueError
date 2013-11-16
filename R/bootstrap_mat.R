@@ -77,7 +77,6 @@ for(i in i:length(vals)){
   }
   
   sfExport(list = list('keep.pol'))
-  
 
   for(j in 1:nrow(new.pol)){
 
@@ -97,4 +96,3 @@ for(i in i:length(vals)){
   save(mat.res, file = 'data/mat.res.RData')
   cat(i)
 }
-
