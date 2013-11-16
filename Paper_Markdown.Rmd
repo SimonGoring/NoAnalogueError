@@ -25,7 +25,7 @@ Methods:
 
 Sites from across North America were used to build a modern analogue dataset.
 
-```{r SiteLocations, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations', echo=FALSE, message=FALSE, warning=FALSE}
+```{r Fig1SiteLocations, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations', echo=FALSE, message=FALSE, warning=FALSE}
 map <- map_data('world')
 
 map <- subset(map, map$long > -170 & map$long < -30)
@@ -48,7 +48,7 @@ Results
 
 When we examine the dissimilarity scores we can see that the distribution between minimum, maximum and overall dissimilarities can be understood numerically and spatially.
 
-```{r MinMaxDissim, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations', echo=FALSE, message=FALSE, warning=FALSE}
+```{r Fig2MinDissim, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations', echo=FALSE, message=FALSE, warning=FALSE}
 
 dissim.scores <- data.frame(dissim = c(min.diss,
                                        as.vector(dists)[sample(length(dists), 10000)]),
@@ -70,7 +70,7 @@ ggplot(dissim.scores) +
 ```
 **Figure 2**.  *Distribution of squared-chord dissimilarity values.  The 95% confidence interval for the minumum spanning distance in the North American Modern Pollen Database is 0.10 - 0.48.  We choose 0.48 as our cut-off for 'non-analogue' distances in the database.*
 
-```{r SiteMDS, fig.width=7, fig.height=6, fig.cap='Figure: North American site MDS scores', echo=FALSE, message=FALSE, warning=FALSE}
+```{r Fig3SiteMDS, fig.width=7, fig.height=6, fig.cap='Figure: North American site MDS scores', echo=FALSE, message=FALSE, warning=FALSE}
 
 mds <- data.frame(pol.mds$points,
                   non.ana = factor(min.diss > 0.48))
@@ -139,13 +139,7 @@ Model outputs
 
 Once the climate variables of interest were established we began by bootstrapping the models for these climate variables.  From the total pool of samples we generate a calibration dataset by sampling with replacement.  
 
-```{r LoadOutputs, echo=FALSE, message=FALSE, warning=FALSE}
-load('data/wa.res.RData')
-load('data/mat.res.RData')
-load('data/wapls.res.RData')
-load('data/rfor.res.RData')
-load('data/brt.res.RData')
-
+```{r Fig4SampleLoss, echo=FALSE, message=FALSE, warning=FALSE}
 
 vals <- c(seq(0, 1, by=0.01))
 
