@@ -2,14 +2,15 @@ Non-analogues in paleoecological reconstruction - the effects of analogue distan
 ========================================================
 
 **Abstract**
-Some jibberish.
+Fossil pollen provides a widespread proxy for past vegetation.  It is increasingly used in paleoclimatic reconstruction, but the limits of its utility are not well known.  Methodological advances, such as the development of tests for spatial autocorrelation, and newer methods for climate reconstruction using boosted regression trees may improve the abilities of these climate reconstruction techniques, but little is known about the accuracy of these models under conditions of non-analogue vegetation known to occur at the end of the late glacial.  In this paper we generate non-analogue pollen assemblages by excluding close neighbours from calibration datasets at increasingly larger squared chord distances.  Using three standard and two newer techniques we then test the ability of pollen-based climate models to accurately recostruct climate under conditions of no-analogue vegetation.
+
 
 
 
 
 Introduction
 =========================
-Pollen assemblages are widely used for paleoclimatic reconstruction during the Holocene, but this method is also applied to pollen assemblages from the last Glacial period (Bartlein et al., 2011), as well as to earlier pollen assemblages, such as those during the Eemian (Brewer et al, 2008).  A particular challenge for climate reconstruction using these much earlier samples is the presence of non-analogue vegetation.  Non-analogue pollen assemblages pose a problem for many reconstruction techniques, these vegetation assemblages may be the result of sets of climate variables that no longer co-exist, ecological conditions resulting from differing rates of species migration or release from herbivores (Gill et al., 2009?), or as a result of changes in human land use (St. Jacques?, maybe not the best. . .).  
+Pollen assemblages are widely used for paleoclimatic reconstruction during the Holocene, but this method is also applied to pollen assemblages from the last Glacial period (Bartlein et al., 2011), as well as to earlier pollen assemblages, such as those during the Eemian (Brewer et al, 2008).  A particular challenge for climate reconstruction using these much earlier samples is the presence of non-analogue vegetation.  Non-analogue pollen assemblages pose a problem for many reconstruction techniques, these vegetation assemblages may be the result of sets of climate variables that no longer co-exist, ecological conditions resulting from differing rates of species migration or release from herbivores (Gill et al., 2009), or as a result of changes in human land use (St. Jacques?, maybe not the best. . .).  
 
 Predicting climate from pollen in non-analogue space is likely to increase the uncertainty of models, possibly introduce systematic bias in predictions, and is likely to increase the variability of predictions across a time-series of predictions from a single site. However, high-quality terrestrial proxies for climate are important for understanding past climate change, and can act as a constraint on models of climate change in the past derived from GCMs in regions where little proxy data is available.  Thus, understanding the behaviour of pollen-based climate reconstructions in non-analogue space is an important first stem in understanding these reconstructions.
 
@@ -20,7 +21,7 @@ Methods:
 
 Sites from across North America were used to build a modern analogue dataset.
 
-![Figure: North American site locations](figure/SiteLocations.png) 
+![Figure: North American site locations](figure/Fig1SiteLocations.png) 
 
 **Figure 1**. Location of sample plots used for analysis.  Samples are derived from a modern pollen dataset.
 
@@ -30,11 +31,11 @@ Results
 
 When we examine the dissimilarity scores we can see that the distribution between minimum, maximum and overall dissimilarities can be understood numerically and spatially.
 
-![Figure: North American site locations](figure/MinMaxDissim.png) 
+![Figure: North American site locations](figure/Fig2MinDissim.png) 
 
 **Figure 2**.  *Distribution of squared-chord dissimilarity values.  The 95% confidence interval for the minumum spanning distance in the North American Modern Pollen Database is 0.10 - 0.48.  We choose 0.48 as our cut-off for 'non-analogue' distances in the database.*
 
-![Figure: North American site MDS scores](figure/SiteMDS.png) 
+![Figure: North American site MDS scores](figure/Fig3SiteMDS.png) 
 
 **Figure 3**. *Location of non-analogue points in the modern pollen data, presented within a non-metric multidimensional scaling ordination (Panel 1) and geographically.  Interestingly, although a number of geographically isolated points exist in the dataset, the majority of non-analogue points exist within the most dense region of sampling, indicating that non-analogue sites are not ecologically stratified.*
 
@@ -82,13 +83,22 @@ Model outputs
 
 Once the climate variables of interest were established we began by bootstrapping the models for these climate variables.  From the total pool of samples we generate a calibration dataset by sampling with replacement.  
 
-![plot of chunk LoadOutputs](figure/LoadOutputs.png) 
+![plot of chunk Fig4SampleLoss](figure/Fig4SampleLoss.png) 
 
-**Figure X**. *As the analogue distance exclusion is increased the available data set size is reduced, although some points continue to maintain a large number of potential analogues, this is directly related to the minimum distance to the closest analogue.  Points that maintain a large pool of analogues are far from neighbours.*
+**Figure 4**. *As the analogue distance exclusion is increased the available data set size is reduced, although some points continue to maintain a large number of potential analogues, this is directly related to the minimum distance to the closest analogue.  Points that maintain a large pool of analogues are far from neighbours.*
 
-![plot of chunk PredictedValues](figure/PredictedValues.png) 
+![plot of chunk Fig5PredictedValues](figure/Fig5PredictedValues.png) 
 
-**Figure X**. *Change in site predictions over time.  Of great interest is the difference between model outputs as the exclusion zone increases.  MAT can never predict beyond the extent of the data samples in the pool, and so as the exclusion zone increases the predictions move toward the dataset mean.  WAPLS uses an initial transformation and then regresses against it to predict new values, so as the exclusion zone increases we see an increase in the spread of the predicted values, with much greater variability and a loss of accuracy.*
+**Figure 5**. *Change in site predictions over time.  Of great interest is the difference between model outputs as the exclusion zone increases.  MAT can never predict beyond the extent of the data samples in the pool, and so as the exclusion zone increases the predictions move toward the dataset mean.  WAPLS uses an initial transformation and then regresses against it to predict new values, so as the exclusion zone increases we see an increase in the spread of the predicted values, with much greater variability and a loss of accuracy.*
+
+![plot of chunk Fig6BiasValues](figure/Fig6BiasValues.png) 
+
+**Figure 6**. *Change in bias over time.*
+
+![plot of chunk Fig7VarianceValues](figure/Fig7VarianceValues.png) 
+
+**Figure 7**. *Change in site variance over time.*
+
 
 Discussion
 =========================
