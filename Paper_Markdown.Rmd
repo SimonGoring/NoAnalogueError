@@ -177,38 +177,100 @@ loss.map <-  ggplot(data = data.frame(map), aes(long, lat)) +
 grid.arrange(loss, loss.map, ncol=2)
 
 ```
-**Figure X**. *As the analogue distance exclusion is increased the available data set size is reduced, although some points continue to maintain a large number of potential analogues, this is directly related to the minimum distance to the closest analogue.  Points that maintain a large pool of analogues are far from neighbours.*
+**Figure 4**. *As the analogue distance exclusion is increased the available data set size is reduced, although some points continue to maintain a large number of potential analogues, this is directly related to the minimum distance to the closest analogue.  Points that maintain a large pool of analogues are far from neighbours.*
 
-```{r PredictedValues, message=FALSE, echo=FALSE, warning=FALSE}
+```{r Fig5PredictedValues, message=FALSE, echo=FALSE, warning=FALSE}
 
-mat.df <- data.frame(site = rep(climate[,1], ncol(mat.res$bias)),
-                     preds = as.vector(mat.res$mean_prediction),
-                     dissim = rep(seq(0, 1, by=0.01),each = nrow(clim)),
-                     model = 'MAT', 
-                     init = rep(climate[,10], ncol(mat.res$bias)))
+model.out <- data.frame(site   = rep(rep(climate[,1], ncol(wa.res$bias)),5),
+                        preds  = c(as.vector(mat.res$mean_prediction),
+                                   as.vector(wa.res$mean_prediction),
+                                   as.vector(wapls.res$mean_prediction),
+                                   as.vector(rfor.res$mean_prediction),
+                                   as.vector(brt.res$mean_prediction)),
+                        bias   = c(as.vector(mat.res$bias),
+                                   as.vector(wa.res$bias),
+                                   as.vector(wapls.res$bias),
+                                   as.vector(rfor.res$bias),
+                                   as.vector(brt.res$bias)),
+                        variance = c(as.vector(mat.res$variance),
+                                   as.vector(wa.res$variance),
+                                   as.vector(wapls.res$variance),
+                                   as.vector(rfor.res$variance),
+                                   as.vector(brt.res$variance)),
+                        dissim = rep(rep(vals, each=nrow(wa.res$bias)),5),
+                        model  = rep(c('MAT', 'WA', 'WAPLS', 'rFor', 'BRT'), each = length(wa.res$bias)),
+                        init = rep(climate[,10], ncol(wa.res$bias), 5))
 
-model.out <- data.frame(site   = rep(rep(climate[,1], ncol(wa.res$bias)),2),
-                        preds  = c(as.vector(wa.res$mean_prediction),
-                                   as.vector(wapls.res$mean_prediction)),
-                        dissim = rep(rep(vals, each=nrow(wa.res$bias)),2),
-                        model  = rep(c('WA', 'WAPLS'), each = length(wa.res$bias)),
-                        init = rep(climate[,10], ncol(wa.res$bias)))
 
-#  Temporary fix until we re-run wa.re and wapls.res
-model.out <- rbind(mat.df, model.out)
-model.out <- model.out[!colSums(is.na(model.out)) > 0,]
+#  This kills ~ 300,000 rows right now because of gaps in rfor.res and brt.res.
+model.out <- model.out[!rowSums(is.na(model.out)) > 0,]
+#  This is a temporary fix, 
+samp.set <- sapply(c('MAT', 'WA', 'WAPLS', 'rFor', 'BRT'), function(x){
+  set.len <- sum(model.out$model == x)
+  if( set.len > 5000) set.len <- 5000
+  sample(which(model.out$model == x), set.len)
+})
+
+model.samp <- model.out[unlist(samp.set),]
 
 #  This plot takes a really long time to plot.
 
-ggplot(model.out, aes(x = dissim, y = preds, group = site, color = init)) +
+ggplot(model.samp, aes(x = dissim, y = preds, group = site, color = init)) +
+  geom_path(alpha = 0.1) +
+  theme_bw() +
+  facet_wrap(~model, scales='free_y', nrow = 1) +
+  scale_x_continuous(expand=c(0,0)) +
+  scale_color_continuous(low='#F08080', high='#4169E1') +
+  theme(legend.position = 'top',
+        axis.title = element_text(family = 'serif', face = 'bold', size = 14),
+        strip.text = element_text(family = 'serif', face = 'bold', size = 14),
+        axis.text = element_text(family = 'serif', size = 10),
+        strip.text = element_text(family = 'serif', face = 'bold', size = 12)) +
+  xlab('Calibration Dissimilarity') +
+  ylab('Predicted Value')
+
+```
+**Figure 5**. *Change in site predictions over time.  Of great interest is the difference between model outputs as the exclusion zone increases.  MAT can never predict beyond the extent of the data samples in the pool, and so as the exclusion zone increases the predictions move toward the dataset mean.  WAPLS uses an initial transformation and then regresses against it to predict new values, so as the exclusion zone increases we see an increase in the spread of the predicted values, with much greater variability and a loss of accuracy.*
+
+```{r Fig6BiasValues, message=FALSE, echo=FALSE, warning=FALSE}
+
+ggplot(model.samp, aes(x = dissim, y = bias, group = site, color = init)) +
+  geom_path(alpha = 0.1) +
+  theme_bw() +
+  facet_wrap(~model, scales='free_y', nrow = 1) +
+  scale_x_continuous(expand=c(0,0)) +
+  scale_color_continuous(low='#F08080', high='#4169E1') +
+  theme(legend.position = 'top',
+        axis.title = element_text(family = 'serif', face = 'bold', size = 14),
+        strip.text = element_text(family = 'serif', face = 'bold', size = 14),
+        axis.text = element_text(family = 'serif', size = 10),
+        strip.text = element_text(family = 'serif', face = 'bold', size = 12)) +
+  xlab('Calibration Dissimilarity') +
+  ylab('Bootstrap Variance')
+
+```
+**Figure 6**. *Change in bias over time.*
+
+```{r Fig7VarianceValues, message=FALSE, echo=FALSE, warning=FALSE}
+
+ggplot(model.out, aes(x = dissim, y = variance, group = site, color = init)) +
   geom_path(alpha = 0.05) +
   theme_bw() +
   facet_wrap(~model, scales='free_y') +
   scale_x_continuous(expand=c(0,0)) +
-  scale_color_continuous(low='#F08080', high='#4169E1')
+  scale_color_continuous(low='#F08080', high='#4169E1') +
+  theme(legend.position = 'top',
+        axis.title = element_text(family = 'serif', face = 'bold', size = 14),
+        strip.text = element_text(family = 'serif', face = 'bold', size = 14),
+        axis.text = element_text(family = 'serif', size = 10),
+        strip.text = element_text(family = 'serif', face = 'bold', size = 12)) +
+  xlab('Calibration Dissimilarity') +
+  ylab('Bootstrap Variance')
+
 
 ```
-**Figure X**. *Change in site predictions over time.  Of great interest is the difference between model outputs as the exclusion zone increases.  MAT can never predict beyond the extent of the data samples in the pool, and so as the exclusion zone increases the predictions move toward the dataset mean.  WAPLS uses an initial transformation and then regresses against it to predict new values, so as the exclusion zone increases we see an increase in the spread of the predicted values, with much greater variability and a loss of accuracy.*
+**Figure 7**. *Change in site variance over time.*
+
 
 Discussion
 =========================
