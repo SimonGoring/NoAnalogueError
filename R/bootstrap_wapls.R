@@ -81,7 +81,7 @@ for(i in 1:length(vals)){
       wapls.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
       wapls.res$bias[j, i] <- (climate[j,10] - mean(prediction, na.rm=TRUE))^2
       wapls.res$exp[j, i]  <- mean((climate[j,10] - prediction)^2)
-      wapls.res$var[j, i]  <- mean((mean(prediction) - prediction)^2)
+      wapls.res$variance[j, i]  <- mean((mean(prediction) - prediction)^2)
     }
     
   }
