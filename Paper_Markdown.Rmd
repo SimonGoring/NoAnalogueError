@@ -234,7 +234,7 @@ ggplot(model.samp, aes(x = dissim, y = preds, group = site, color = init)) +
 
 ```{r Fig6BiasValues, message=FALSE, echo=FALSE, warning=FALSE}
 
-ggplot(model.samp, aes(x = dissim, y = bias, group = site, color = init)) +
+ggplot(model.samp, aes(x = dissim, y = sqrt(bias), group = site, color = init)) +
   geom_path(alpha = 0.1) +
   theme_bw() +
   facet_wrap(~model, scales='free_y', nrow = 1) +
@@ -246,7 +246,7 @@ ggplot(model.samp, aes(x = dissim, y = bias, group = site, color = init)) +
         axis.text = element_text(family = 'serif', size = 10),
         strip.text = element_text(family = 'serif', face = 'bold', size = 12)) +
   xlab('Calibration Dissimilarity') +
-  ylab('Bootstrap Variance')
+  ylab('Bias (RMSEP)')
 
 ```
 **Figure 6**. *Change in bias over time.*
