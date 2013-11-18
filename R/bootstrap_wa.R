@@ -86,7 +86,7 @@ for(i in i:length(vals)){
       wa.res$expectation[j, i]  <- mean((climate[j,10] - prediction)^2, na.rm=TRUE)
       wa.res$variance[j, i]  <- mean((mean(prediction, na.rm=TRUE) - prediction)^2, na.rm=TRUE)
     }
-        
+     
   }
   if(ncol(wa.res$bias) > i){
     if(!sum(is.na(wa.res$bias[,i+1])) == 0){
