@@ -239,7 +239,7 @@ ggplot(model.samp, aes(x = dissim, y = sqrt(bias), group = site, color = init)) 
   theme_bw() +
   facet_wrap(~model, scales='free_y', nrow = 1) +
   scale_x_continuous(expand=c(0,0)) +
-  scale_y_continuout(expand = c(0,0)) +
+  scale_y_continuous(expand = c(0,0)) +
   scale_color_continuous(low='#F08080', high='#4169E1') +
   theme(legend.position = 'top',
         axis.title = element_text(family = 'serif', face = 'bold', size = 14),
@@ -247,11 +247,7 @@ ggplot(model.samp, aes(x = dissim, y = sqrt(bias), group = site, color = init)) 
         axis.text = element_text(family = 'serif', size = 10),
         strip.text = element_text(family = 'serif', face = 'bold', size = 12)) +
   xlab('Calibration Dissimilarity') +
-<<<<<<< HEAD
   ylab('Bias (RMSEP)')
-=======
-  ylab('Estimate Bias')
->>>>>>> ad35752dcef74a84e8758de643e842712363e9d9
 
 ```
 **Figure 6**. *Change in bias over time.*
