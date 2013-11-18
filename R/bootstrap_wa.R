@@ -97,3 +97,5 @@ for(i in i:length(vals)){
   cat(i)  
   
 }
+
+sfStop()
