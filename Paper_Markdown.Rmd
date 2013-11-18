@@ -2,7 +2,8 @@ Non-analogues in paleoecological reconstruction - the effects of analogue distan
 ========================================================
 
 **Abstract**
-Some jibberish.
+Fossil pollen provides a widespread proxy for past vegetation.  It is increasingly used in paleoclimatic reconstruction, but the limits of its utility are not well known.  Methodological advances, such as the development of tests for spatial autocorrelation, and newer methods for climate reconstruction using boosted regression trees may improve the abilities of these climate reconstruction techniques, but little is known about the accuracy of these models under conditions of non-analogue vegetation known to occur at the end of the late glacial.  In this paper we generate non-analogue pollen assemblages by excluding close neighbours from calibration datasets at increasingly larger squared chord distances.  Using three standard and two newer techniques we then test the ability of pollen-based climate models to accurately recostruct climate under conditions of no-analogue vegetation.
+
 
 ```{r LoadData, echo=FALSE, warning=FALSE, message=FALSE}
 library(gridExtra)
@@ -13,7 +14,7 @@ source('R/data_setup.R')
 
 Introduction
 =========================
-Pollen assemblages are widely used for paleoclimatic reconstruction during the Holocene, but this method is also applied to pollen assemblages from the last Glacial period (Bartlein et al., 2011), as well as to earlier pollen assemblages, such as those during the Eemian (Brewer et al, 2008).  A particular challenge for climate reconstruction using these much earlier samples is the presence of non-analogue vegetation.  Non-analogue pollen assemblages pose a problem for many reconstruction techniques, these vegetation assemblages may be the result of sets of climate variables that no longer co-exist, ecological conditions resulting from differing rates of species migration or release from herbivores (Gill et al., 2009?), or as a result of changes in human land use (St. Jacques?, maybe not the best. . .).  
+Pollen assemblages are widely used for paleoclimatic reconstruction during the Holocene, but this method is also applied to pollen assemblages from the last Glacial period (Bartlein et al., 2011), as well as to earlier pollen assemblages, such as those during the Eemian (Brewer et al, 2008).  A particular challenge for climate reconstruction using these much earlier samples is the presence of non-analogue vegetation.  Non-analogue pollen assemblages pose a problem for many reconstruction techniques, these vegetation assemblages may be the result of sets of climate variables that no longer co-exist, ecological conditions resulting from differing rates of species migration or release from herbivores (Gill et al., 2009), or as a result of changes in human land use (St. Jacques?, maybe not the best. . .).  
 
 Predicting climate from pollen in non-analogue space is likely to increase the uncertainty of models, possibly introduce systematic bias in predictions, and is likely to increase the variability of predictions across a time-series of predictions from a single site. However, high-quality terrestrial proxies for climate are important for understanding past climate change, and can act as a constraint on models of climate change in the past derived from GCMs in regions where little proxy data is available.  Thus, understanding the behaviour of pollen-based climate reconstructions in non-analogue space is an important first stem in understanding these reconstructions.
 
@@ -24,7 +25,7 @@ Methods:
 
 Sites from across North America were used to build a modern analogue dataset.
 
-```{r SiteLocations, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations', echo=FALSE, message=FALSE, warning=FALSE}
+```{r Fig1SiteLocations, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations', echo=FALSE, message=FALSE, warning=FALSE}
 map <- map_data('world')
 
 map <- subset(map, map$long > -170 & map$long < -30)
@@ -47,13 +48,11 @@ Results
 
 When we examine the dissimilarity scores we can see that the distribution between minimum, maximum and overall dissimilarities can be understood numerically and spatially.
 
-```{r MinMaxDissim, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations', echo=FALSE, message=FALSE, warning=FALSE}
+```{r Fig2MinDissim, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations', echo=FALSE, message=FALSE, warning=FALSE}
 
-dissim.scores <- data.frame(dissim = c(min.diss, 
-                                       max.diss, 
+dissim.scores <- data.frame(dissim = c(min.diss,
                                        as.vector(dists)[sample(length(dists), 10000)]),
                             class   = c(rep('Minimum', length(min.diss)),
-                                        rep('Maximim', length(max.diss)), 
                                         rep('All', 10000)))
               
 ggplot(dissim.scores) + 
@@ -64,13 +63,14 @@ ggplot(dissim.scores) +
   theme(text = element_text(size=24, family='serif'),
         strip.text = element_text(size=14, family='serif'),
         axis.text = element_text(size = 12, family='serif')) +
-  annotate("segment", x=0.48, xend = -.32, y = 0, yend = 1, size=3, color='red') +
+  annotate("segment", x=0.48, 
+           xend = -.32, y = 0, yend = 1, size=3, color='red') +
   scale_x_log10() + scale_y_sqrt()
 
 ```
 **Figure 2**.  *Distribution of squared-chord dissimilarity values.  The 95% confidence interval for the minumum spanning distance in the North American Modern Pollen Database is 0.10 - 0.48.  We choose 0.48 as our cut-off for 'non-analogue' distances in the database.*
 
-```{r SiteMDS, fig.width=7, fig.height=6, fig.cap='Figure: North American site MDS scores', echo=FALSE, message=FALSE, warning=FALSE}
+```{r Fig3SiteMDS, fig.width=7, fig.height=6, fig.cap='Figure: North American site MDS scores', echo=FALSE, message=FALSE, warning=FALSE}
 
 mds <- data.frame(pol.mds$points,
                   non.ana = factor(min.diss > 0.48))
@@ -89,7 +89,9 @@ non.ana.map <- ggplot(data = data.frame(map), aes(long, lat)) +
   geom_point(data = data.frame(climate)[mds$non.ana == TRUE,], 
              aes(x = LONDD, y = LATDD), color = 'red') +
    theme_bw() +
-  coord_map(projection='albers', lat0=30, lat1=50, xlim=c(-140, -60), ylim=c(26, 75))
+  coord_map(projection='albers', lat0=30, lat1=50, xlim=c(-140, -60), ylim=c(26, 75)) +
+  xlab('Longitude') + ylab('Latitude') +
+  theme(text = element_text(size=24, family='serif'))
 
 grid.arrange(non.ana, non.ana.map, ncol=2)
 
@@ -137,12 +139,9 @@ Model outputs
 
 Once the climate variables of interest were established we began by bootstrapping the models for these climate variables.  From the total pool of samples we generate a calibration dataset by sampling with replacement.  
 
-```{r LoadOutputs, echo=FALSE, message=FALSE, warning=FALSE}
-load('data/wa.res.RData')
-load('data/mat.res.RData')
-load('data/wapls.res.RData')
+```{r Fig4SampleLoss, echo=FALSE, message=FALSE, warning=FALSE}
 
-vals <- c(seq(0, 0.2, by=0.001), seq(0.21, 1, by=0.01))
+vals <- c(seq(0, 1, by=0.01))
 
 na.samples <- data.frame(site = rep(climate[,1], ncol(mat.res$bias)),
                          size = as.vector(mat.res$sample_size),
@@ -178,38 +177,100 @@ loss.map <-  ggplot(data = data.frame(map), aes(long, lat)) +
 grid.arrange(loss, loss.map, ncol=2)
 
 ```
-**Figure X**. *As the analogue distance exclusion is increased the available data set size is reduced, although some points continue to maintain a large number of potential analogues, this is directly related to the minimum distance to the closest analogue.  Points that maintain a large pool of analogues are far from neighbours.*
+**Figure 4**. *As the analogue distance exclusion is increased the available data set size is reduced, although some points continue to maintain a large number of potential analogues, this is directly related to the minimum distance to the closest analogue.  Points that maintain a large pool of analogues are far from neighbours.*
 
-```{r PredictedValues, message=FALSE, echo=FALSE, warning=FALSE}
+```{r Fig5PredictedValues, message=FALSE, echo=FALSE, warning=FALSE}
 
-mat.df <- data.frame(site = rep(climate[,1], ncol(mat.res$bias)),
-                     preds = as.vector(mat.res$mean_prediction),
-                     dissim = rep(seq(0, 1, by=0.01),each = nrow(clim)),
-                     model = 'MAT', 
-                     init = rep(climate[,10], ncol(mat.res$bias)))
+model.out <- data.frame(site   = rep(rep(climate[,1], ncol(wa.res$bias)),5),
+                        preds  = c(as.vector(mat.res$mean_prediction),
+                                   as.vector(wa.res$mean_prediction),
+                                   as.vector(wapls.res$mean_prediction),
+                                   as.vector(rfor.res$mean_prediction),
+                                   as.vector(brt.res$mean_prediction)),
+                        bias   = c(as.vector(mat.res$bias),
+                                   as.vector(wa.res$bias),
+                                   as.vector(wapls.res$bias),
+                                   as.vector(rfor.res$bias),
+                                   as.vector(brt.res$bias)),
+                        variance = c(as.vector(mat.res$variance),
+                                   as.vector(wa.res$variance),
+                                   as.vector(wapls.res$variance),
+                                   as.vector(rfor.res$variance),
+                                   as.vector(brt.res$variance)),
+                        dissim = rep(rep(vals, each=nrow(wa.res$bias)),5),
+                        model  = rep(c('MAT', 'WA', 'WAPLS', 'rFor', 'BRT'), each = length(wa.res$bias)),
+                        init = rep(climate[,10], ncol(wa.res$bias), 5))
 
-model.out <- data.frame(site   = rep(rep(climate[,1], ncol(wa.res$bias)),2),
-                        preds  = c(as.vector(wa.res$mean_prediction),
-                                   as.vector(wapls.res$mean_prediction)),
-                        dissim = rep(rep(vals, each=nrow(wa.res$bias)),2),
-                        model  = rep(c('WA', 'WAPLS'), each = length(wa.res$bias)),
-                        init = rep(climate[,10], ncol(wa.res$bias)))
 
-#  Temporary fix until we re-run wa.re and wapls.res
-model.out <- rbind(mat.df, model.out)
-model.out <- model.out[!colSums(is.na(model.out)) > 0,]
+#  This kills ~ 300,000 rows right now because of gaps in rfor.res and brt.res.
+model.out <- model.out[!rowSums(is.na(model.out)) > 0,]
+#  This is a temporary fix, 
+samp.set <- sapply(c('MAT', 'WA', 'WAPLS', 'rFor', 'BRT'), function(x){
+  set.len <- sum(model.out$model == x)
+  if( set.len > 5000) set.len <- 5000
+  sample(which(model.out$model == x), set.len)
+})
+
+model.samp <- model.out[unlist(samp.set),]
 
 #  This plot takes a really long time to plot.
 
-ggplot(model.out, aes(x = dissim, y = preds, group = site, color = init)) +
+ggplot(model.samp, aes(x = dissim, y = preds, group = site, color = init)) +
+  geom_path(alpha = 0.1) +
+  theme_bw() +
+  facet_wrap(~model, scales='free_y', nrow = 1) +
+  scale_x_continuous(expand=c(0,0)) +
+  scale_color_continuous(low='#F08080', high='#4169E1') +
+  theme(legend.position = 'top',
+        axis.title = element_text(family = 'serif', face = 'bold', size = 14),
+        strip.text = element_text(family = 'serif', face = 'bold', size = 14),
+        axis.text = element_text(family = 'serif', size = 10),
+        strip.text = element_text(family = 'serif', face = 'bold', size = 12)) +
+  xlab('Calibration Dissimilarity') +
+  ylab('Predicted Value')
+
+```
+**Figure 5**. *Change in site predictions over time.  Of great interest is the difference between model outputs as the exclusion zone increases.  MAT can never predict beyond the extent of the data samples in the pool, and so as the exclusion zone increases the predictions move toward the dataset mean.  WAPLS uses an initial transformation and then regresses against it to predict new values, so as the exclusion zone increases we see an increase in the spread of the predicted values, with much greater variability and a loss of accuracy.*
+
+```{r Fig6BiasValues, message=FALSE, echo=FALSE, warning=FALSE}
+
+ggplot(model.samp, aes(x = dissim, y = bias, group = site, color = init)) +
+  geom_path(alpha = 0.1) +
+  theme_bw() +
+  facet_wrap(~model, scales='free_y', nrow = 1) +
+  scale_x_continuous(expand=c(0,0)) +
+  scale_color_continuous(low='#F08080', high='#4169E1') +
+  theme(legend.position = 'top',
+        axis.title = element_text(family = 'serif', face = 'bold', size = 14),
+        strip.text = element_text(family = 'serif', face = 'bold', size = 14),
+        axis.text = element_text(family = 'serif', size = 10),
+        strip.text = element_text(family = 'serif', face = 'bold', size = 12)) +
+  xlab('Calibration Dissimilarity') +
+  ylab('Bootstrap Variance')
+
+```
+**Figure 6**. *Change in bias over time.*
+
+```{r Fig7VarianceValues, message=FALSE, echo=FALSE, warning=FALSE}
+
+ggplot(model.out, aes(x = dissim, y = variance, group = site, color = init)) +
   geom_path(alpha = 0.05) +
   theme_bw() +
   facet_wrap(~model, scales='free_y') +
   scale_x_continuous(expand=c(0,0)) +
-  scale_color_continuous(low='#F08080', high='#4169E1')
+  scale_color_continuous(low='#F08080', high='#4169E1') +
+  theme(legend.position = 'top',
+        axis.title = element_text(family = 'serif', face = 'bold', size = 14),
+        strip.text = element_text(family = 'serif', face = 'bold', size = 14),
+        axis.text = element_text(family = 'serif', size = 10),
+        strip.text = element_text(family = 'serif', face = 'bold', size = 12)) +
+  xlab('Calibration Dissimilarity') +
+  ylab('Bootstrap Variance')
+
 
 ```
-**Figure X**. *Change in site predictions over time.  Of great interest is the difference between model outputs as the exclusion zone increases.  MAT can never predict beyond the extent of the data samples in the pool, and so as the exclusion zone increases the predictions move toward the dataset mean.  WAPLS uses an initial transformation and then regresses against it to predict new values, so as the exclusion zone increases we see an increase in the spread of the predicted values, with much greater variability and a loss of accuracy.*
+**Figure 7**. *Change in site variance over time.*
+
 
 Discussion
 =========================

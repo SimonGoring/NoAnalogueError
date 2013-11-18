@@ -37,3 +37,9 @@ max.diss <- apply(diag.dist, 2, max, na.rm=TRUE)
 
 min.dist.dens <- density(min.diss, from=0, to=1.5, n=100)
 max.dist.dens <- density(max.diss, from=0, to=1.5, n=100)
+
+load('data/wa.res.RData')
+load('data/mat.res.RData')
+load('data/wapls.res.RData')
+load('data/rfor.res.RData')
+load('data/brt.res.RData')
