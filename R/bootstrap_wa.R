@@ -82,8 +82,8 @@ for(i in i:length(vals)){
     
       wa.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
       wa.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
-      wa.res$bias[j, i] <- (climate[j,4] - mean(prediction, na.rm=TRUE))^2
-      wa.res$expectation[j, i]  <- mean((climate[j,4] - prediction)^2, na.rm=TRUE)
+      wa.res$bias[j, i] <- (climate[j,10] - mean(prediction, na.rm=TRUE))^2
+      wa.res$expectation[j, i]  <- mean((climate[j,10] - prediction)^2, na.rm=TRUE)
       wa.res$variance[j, i]  <- mean((mean(prediction, na.rm=TRUE) - prediction)^2, na.rm=TRUE)
     }
         
@@ -97,3 +97,5 @@ for(i in i:length(vals)){
   cat(i)  
   
 }
+
+sfStop()
