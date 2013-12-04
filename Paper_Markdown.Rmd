@@ -6,7 +6,6 @@ Non-analogues in paleoecological reconstruction - the effects of analogue distan
 
 
 ```{r LoadData, echo=FALSE, warning=FALSE, message=FALSE}
-library(gridExtra)
 
 source('R/data_setup.R')
 
