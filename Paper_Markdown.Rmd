@@ -217,7 +217,7 @@ model.samp <- model.out[unlist(samp.set),]
 ggplot(model.samp, aes(x = dissim, y = preds, group = site, color = init)) +
   geom_path(alpha = 0.1) +
   theme_bw() +
-  facet_wrap(~model, scales='free_y', nrow = 1) +
+  facet_wrap(~model, nrow = 1) +
   scale_x_continuous(expand=c(0,0)) +
   scale_color_continuous(low='#F08080', high='#4169E1') +
   theme(legend.position = 'top',
