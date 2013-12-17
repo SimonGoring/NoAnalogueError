@@ -102,7 +102,7 @@ Climate Variables
 
 We used the `r nrow(climate)` records from the North American Modern Pollen Database and associated climate data to provide reconstructions of key climatic variables. The process of calculating the lambda/lambda ratio from RDA (ref) produces interesting relationships, perhaps impacted by the breadth of the available climate and pollen data across North America.
 
-```{r message=FALSE, warning=FALSE}
+```{r echo = FALSE, message=FALSE, warning=FALSE}
 
 #  Sakari, can you take a look at this and let me know what you think?  Am I doing this right, and what do you make of these results?  Are we simply using too large a dataset?
 
@@ -226,7 +226,8 @@ ggplot(model.samp, aes(x = dissim, y = preds, group = site, color = init)) +
         axis.text = element_text(family = 'serif', size = 10),
         strip.text = element_text(family = 'serif', face = 'bold', size = 12)) +
   xlab('Calibration Dissimilarity') +
-  ylab('Predicted Value')
+  ylab('Predicted Value') +
+  ylim(0, 40)
 
 ```
 **Figure 5**. *Change in site predictions over time.  Of great interest is the difference between model outputs as the exclusion zone increases.  MAT can never predict beyond the extent of the data samples in the pool, and so as the exclusion zone increases the predictions move toward the dataset mean.  WAPLS uses an initial transformation and then regresses against it to predict new values, so as the exclusion zone increases we see an increase in the spread of the predicted values, with much greater variability and a loss of accuracy.*
@@ -236,9 +237,9 @@ ggplot(model.samp, aes(x = dissim, y = preds, group = site, color = init)) +
 ggplot(model.samp, aes(x = dissim, y = sqrt(bias), group = site, color = init)) +
   geom_path(alpha = 0.1) +
   theme_bw() +
-  facet_wrap(~model, scales='free_y', nrow = 1) +
+  facet_wrap(~model, nrow = 1) +
   scale_x_continuous(expand=c(0,0)) +
-  scale_y_continuous(expand = c(0,0)) +
+  scale_y_sqrt(expand = c(0,0)) +
   scale_color_continuous(low='#F08080', high='#4169E1') +
   theme(legend.position = 'top',
         axis.title = element_text(family = 'serif', face = 'bold', size = 14),
@@ -258,6 +259,7 @@ ggplot(model.samp, aes(x = dissim, y = sqrt(variance), group = site, color = ini
   theme_bw() +
   facet_wrap(~model, nrow = 1) +
   scale_x_continuous(expand=c(0,0)) +
+  scale_y_sqrt(expand=c(0,0)) +
   scale_color_continuous(low='#F08080', high='#4169E1') +
   theme(legend.position = 'top',
         axis.title = element_text(family = 'serif', face = 'bold', size = 14),

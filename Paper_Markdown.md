@@ -45,25 +45,6 @@ Climate Variables
 We used the 2289 records from the North American Modern Pollen Database and associated climate data to provide reconstructions of key climatic variables. The process of calculating the lambda/lambda ratio from RDA (ref) produces interesting relationships, perhaps impacted by the breadth of the available climate and pollen data across North America.
 
 
-```r
-
-# Sakari, can you take a look at this and let me know what you think?  Am I
-# doing this right, and what do you make of these results?  Are we simply
-# using too large a dataset?
-
-pol <- mod_pol[, 7:ncol(mod_pol)]
-clim <- climate[, 4:ncol(climate)]
-
-clim.ratio <- rep(NA, ncol(clim))
-
-for (i in 1:ncol(clim)) {
-    test.struct <- rda(pol ~ clim[, i])
-    clim.ratio[i] <- test.struct$CCA$tot.chi/test.struct$CA$tot.chi
-}
-
-names(clim.ratio) <- colnames(clim)
-best.clim <- round(clim.ratio[order(clim.ratio, decreasing = TRUE)] * 100, 0)
-```
 
 
 Variable | Percent Variability
