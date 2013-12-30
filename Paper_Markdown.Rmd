@@ -25,6 +25,7 @@ Methods:
 Sites from across North America were used to build a modern analogue dataset.
 
 ```{r Fig1SiteLocations, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations', echo=FALSE, message=FALSE, warning=FALSE}
+
 map <- map_data('world')
 
 map <- subset(map, map$long > -170 & map$long < -30)
@@ -138,7 +139,7 @@ Model outputs
 
 Once the climate variables of interest were established we began by bootstrapping the models for these climate variables.  From the total pool of samples we generate a calibration dataset by sampling with replacement.  
 
-```{r Fig4SampleLoss, echo=FALSE, message=FALSE, warning=FALSE}
+```{r Fig4SampleLoss, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.width=6}
 
 vals <- c(seq(0, 1, by=0.01))
 
@@ -180,6 +181,10 @@ grid.arrange(loss, loss.map, ncol=2)
 
 ```{r Fig5PredictedValues, message=FALSE, echo=FALSE, warning=FALSE}
 
+init.color <- colorRampPalette(c('#F08080', '#68d64f', '#4169E1'))
+clim.colors <- seq(0, 31, length.out = 300)
+init.set <- init.color(300)[findInterval(x = climate[,10], vec=clim.colors)]
+
 model.out <- data.frame(site   = rep(rep(climate[,1], ncol(wa.res$bias)),5),
                         preds  = c(as.vector(mat.res$mean_prediction),
                                    as.vector(wa.res$mean_prediction),
@@ -198,17 +203,26 @@ model.out <- data.frame(site   = rep(rep(climate[,1], ncol(wa.res$bias)),5),
                                    as.vector(brt.res$variance)),
                         dissim = rep(rep(vals, each=nrow(wa.res$bias)),5),
                         model  = rep(c('MAT', 'WA', 'WAPLS', 'rFor', 'BRT'), each = length(wa.res$bias)),
-                        init = rep(climate[,10], ncol(wa.res$bias), 5))
-
+                        init = rep(rep(climate[,10], 101), 5))
 
 #  This kills ~ 300,000 rows right now because of gaps in rfor.res and brt.res.
 model.out <- model.out[!rowSums(is.na(model.out)) > 0,]
+
 #  This is a temporary fix, 
-samp.set <- sapply(c('MAT', 'WA', 'WAPLS', 'rFor', 'BRT'), function(x){
+sample.model <- function(x){
+  #  How many samples exist for the model?
   set.len <- sum(model.out$model == x)
   if( set.len > 5000) set.len <- 5000
-  sample(which(model.out$model == x), set.len)
-})
+  
+  set <- sample(which(model.out$model == x), set.len)
+  start.end <- which(model.out$model == x & 
+                       (model.out$dissim %in% c(0, 0.5, 1)))
+  
+  unique(c(set, start.end))
+  
+}
+
+samp.set <- sapply(c('MAT', 'WA', 'WAPLS', 'rFor', 'BRT'), sample.model)
 
 model.samp <- model.out[unlist(samp.set),]
 
@@ -218,16 +232,18 @@ ggplot(model.samp, aes(x = dissim, y = preds, group = site, color = init)) +
   geom_path(alpha = 0.1) +
   theme_bw() +
   facet_wrap(~model, nrow = 1) +
-  scale_x_continuous(expand=c(0,0)) +
-  scale_color_continuous(low='#F08080', high='#4169E1') +
-  theme(legend.position = 'top',
+  scale_x_continuous(expand=c(0,0), breaks = c(0.5, 1)) +
+  scale_y_continuous(expand=c(0,0), limits=c(0, 40)) +
+  scale_color_continuous(low = 'blue', high='pink', trans='sqrt') +
+  theme(legend.position = 'none',
         axis.title = element_text(family = 'serif', face = 'bold', size = 14),
         strip.text = element_text(family = 'serif', face = 'bold', size = 14),
         axis.text = element_text(family = 'serif', size = 10),
         strip.text = element_text(family = 'serif', face = 'bold', size = 12)) +
+  annotate("segment", x=0.48, 
+           xend = 0.48, y = 0, yend = 100, size=1, linetype='dashed') +
   xlab('Calibration Dissimilarity') +
-  ylab('Predicted Value') +
-  ylim(0, 40)
+  ylab('Predicted Value')
 
 ```
 **Figure 5**. *Change in site predictions over time.  Of great interest is the difference between model outputs as the exclusion zone increases.  MAT can never predict beyond the extent of the data samples in the pool, and so as the exclusion zone increases the predictions move toward the dataset mean.  WAPLS uses an initial transformation and then regresses against it to predict new values, so as the exclusion zone increases we see an increase in the spread of the predicted values, with much greater variability and a loss of accuracy.*
@@ -238,10 +254,10 @@ ggplot(model.samp, aes(x = dissim, y = sqrt(bias), group = site, color = init)) 
   geom_path(alpha = 0.1) +
   theme_bw() +
   facet_wrap(~model, nrow = 1) +
-  scale_x_continuous(expand=c(0,0)) +
-  scale_y_sqrt(expand = c(0,0)) +
-  scale_color_continuous(low='#F08080', high='#4169E1') +
-  theme(legend.position = 'top',
+  scale_x_continuous(expand=c(0,0), breaks = c(0.5, 1)) +
+  scale_y_sqrt(expand=c(0,0)) +
+  scale_color_continuous(low = 'blue', high='pink', trans='sqrt') +
+  theme(legend.position = 'none',
         axis.title = element_text(family = 'serif', face = 'bold', size = 14),
         strip.text = element_text(family = 'serif', face = 'bold', size = 14),
         axis.text = element_text(family = 'serif', size = 10),
@@ -255,20 +271,19 @@ ggplot(model.samp, aes(x = dissim, y = sqrt(bias), group = site, color = init)) 
 ```{r Fig7VarianceValues, message=FALSE, echo=FALSE, warning=FALSE}
 
 ggplot(model.samp, aes(x = dissim, y = sqrt(variance), group = site, color = init)) +
-  geom_path(alpha = 0.05) +
+  geom_path(alpha = 0.1) +
   theme_bw() +
   facet_wrap(~model, nrow = 1) +
-  scale_x_continuous(expand=c(0,0)) +
+  scale_x_continuous(expand=c(0,0), breaks = c(0.5, 1)) +
   scale_y_sqrt(expand=c(0,0)) +
-  scale_color_continuous(low='#F08080', high='#4169E1') +
-  theme(legend.position = 'top',
+  scale_color_continuous(low = 'blue', high='pink', trans='sqrt') +
+  theme(legend.position = 'none',
         axis.title = element_text(family = 'serif', face = 'bold', size = 14),
         strip.text = element_text(family = 'serif', face = 'bold', size = 14),
         axis.text = element_text(family = 'serif', size = 10),
         strip.text = element_text(family = 'serif', face = 'bold', size = 12)) +
   xlab('Calibration Dissimilarity') +
   ylab('Bootstrap Variance')
-
 
 ```
 **Figure 7**. *Change in site variance over time.*
