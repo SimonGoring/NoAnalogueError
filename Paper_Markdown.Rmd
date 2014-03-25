@@ -71,7 +71,7 @@ ggplot(dissim.scores) +
 **Figure 2**.  *Distribution of squared-chord dissimilarity values.  The 95% confidence interval for the minumum spanning distance in the North American Modern Pollen Database is 0.10 - 0.48.  We choose 0.48 as our cut-off for 'non-analogue' distances in the database.*
 
 ```{r Fig3SiteMDS, fig.width=7, fig.height=6, fig.cap='Figure: North American site MDS scores', echo=FALSE, message=FALSE, warning=FALSE}
-
+X
 mds <- data.frame(pol.mds$points,
                   non.ana = factor(min.diss > 0.48))
 

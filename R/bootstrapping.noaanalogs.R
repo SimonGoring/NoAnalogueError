@@ -52,6 +52,10 @@ rfor.res <- list(prediction     = matrix(ncol=length(vals), nrow=nrow(new.pol)),
                  r.squared      = matrix(ncol=length(vals), nrow=nrow(new.pol)),
                  closest.n      = matrix(ncol=length(vals), nrow=nrow(new.pol)))
 
+brt.res <- list(prediction     = matrix(ncol=length(vals), nrow=nrow(new.pol)),
+                r.squared      = matrix(ncol=length(vals), nrow=nrow(new.pol)),
+                closest.n      = matrix(ncol=length(vals), nrow=nrow(new.pol)))
+
 
 fmat <- function(x){
   #  returns the means of the 1:10 closest:
@@ -131,6 +135,17 @@ for(i in 1:length(vals)){
       
     }
             
+    if(is.na(brt.res$prediction[j,i])){
+      rfor <- try(randomForest(x=new.pol[keep.pol[j,],!zeros], y = climate[keep.pol[j,],4]))
+      
+      if(length(rfor) > 1){
+        pred.brt <- predict(rfor, newdata = new.pol[j,!zeros])
+        brt.res$prediction[j,i] <- pred.rfor
+        brt.res$r.squared[j,i]  <- mean(rfor$rsq)
+      }
+      
+    }
+    
     if(j %% 120 == 0) cat('.')
   }
   cat('\n', i)
