@@ -1,4 +1,6 @@
-install.packages(c('gridExtra', 'ggplot2', 'MASS', 'plyr', 'rioja', 'randomForest', 'vegan', 'maps', 'maptools', 'ggmap'))
+if(install.it == TRUE){
+  install.packages(c('gridExtra', 'ggplot2', 'MASS', 'plyr', 'rioja', 'randomForest', 'vegan', 'maps', 'maptools', 'ggmap'))
+}
 
 library(gridExtra)
 library(ggplot2)
