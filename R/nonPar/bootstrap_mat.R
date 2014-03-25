@@ -9,6 +9,11 @@ mat.res <- list(mean_prediction  = matrix(ncol=length(vals), nrow=nrow(new.pol))
                 variance         = matrix(ncol=length(vals), nrow=nrow(new.pol)),
                 expectation      = matrix(ncol=length(vals), nrow=nrow(new.pol)))
 
+
+if('mat.res.RData' %in% list.files('data/')) {
+  load('data/mat.res.RData')
+}
+
 #  Turn the distance table into a matrix.
 diag.dist <- as.matrix(dists); diag(diag.dist) <- NA
 
