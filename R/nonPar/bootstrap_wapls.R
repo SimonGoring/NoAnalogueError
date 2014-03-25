@@ -1,8 +1,3 @@
-library(snowfall)
-
-sfStop()
-sfInit(parallel = TRUE, cpus = 6)
-
 # Set up the analogue distance exclusion values.
 #  This was originally a set of quantiles, but it played havoc on plotting and
 #  didn't seem to add much to the understanding of what was going on.
@@ -55,13 +50,7 @@ wapls.run <- function(j){
   
 }
 
-#  Parallelize:
-sfExport(list = list('wapls.run'))
-sfExport(list = list('new.pol'))
-sfExport(list = list('subset.pol'))
-sfExport(list = list('climate'))
 sfLibrary(rioja)
-
 
 for(i in 1:length(vals)){
   #  This runs through each analogue distance
@@ -69,13 +58,11 @@ for(i in 1:length(vals)){
                     function(x) {x > vals[i]})
   diag(keep.pol) <- FALSE
   
-  sfExport(list = list('keep.pol'))
-  
   for(j in 1:nrow(new.pol)){
     
     if(is.na(wapls.res$mean_prediction[j,i])){
       #  Run WA with monotonic deshrinking.
-      prediction <- unlist(sfLapply(rep(j, 100), fun = wapls.run))
+      prediction <- unlist(lapply(rep(j, 100), fun = wapls.run))
     
       wapls.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
       wapls.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
@@ -89,5 +76,3 @@ for(i in 1:length(vals)){
   save(wapls.res, file = 'data/wapls.res.RData')
   cat(i)
 }
-
-  

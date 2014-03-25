@@ -1,13 +1,22 @@
 #  Run all bootstraps:
 source('R/data_setup.R')
 
-source('R/nonPar/bootstrap_mat.R')
+
+par <- FALSE
+
+file.lead <- ifelse(par == TRUE, 'R/', 'R/nonPar/')
+
+source(paste(file.lead, 'bootstrap_mat.R', sep ='')
 cat('Done MAT/n')
-source('R/nonPar/bootstrap_wa.R')
+
+source(paste(file.lead, 'bootstrap_wa.R', sep ='')
 cat('Done WA/n')
-source('R/nonPar/bootstrap_wapls.R')
+
+source(paste(file.lead, 'bootstrap_wapls.R', sep ='')
 cat('Done WAPLS/n')
-source('R/nonPar/bootstrap_rfor.R')
+
+source(paste(file.lead, 'bootstrap_rfor.R', sep ='')
 cat('Done rFor/n')
-source('R/nonPar/bootstrap_brt.R')
+
+source(paste(file.lead, 'bootstrap_brt.R', sep ='')
 cat('Done rFor/n')

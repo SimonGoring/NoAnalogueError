@@ -1,9 +1,4 @@
-library(snowfall)
-
 library(randomForest)
-
-sfStop()
-sfInit(parallel = TRUE, cpus = 6)
 
 vals <- seq(0, 1, by=0.01)
 
@@ -53,13 +48,6 @@ rfor.run <- function(j){
   
 }
 
-#  Parallelize:
-sfExport(list = list('rfor.run'))
-sfExport(list = list('new.pol'))
-sfExport(list = list('subset.pol'))
-sfExport(list = list('climate'))
-sfLibrary(randomForest)
-
 #  Create a set of all possible xy pairs in the rfor tables, and then look to see if
 #  they've been sampled yet.
 longlist <- expand.grid(row = 1:nrow(new.pol), col=1:length(vals))
@@ -103,7 +91,7 @@ for(k in samp){
     
   if(is.na(rfor.res$mean_prediction[j,i])){
     #  Run randomForest with raw defaults
-    prediction <- unlist(sfLapply(rep(j, 50), fun = rfor.run))
+    prediction <- unlist(lapply(rep(j, 50), fun = rfor.run))
   
     rfor.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
     rfor.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
