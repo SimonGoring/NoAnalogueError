@@ -50,8 +50,6 @@ wapls.run <- function(j){
   
 }
 
-sfLibrary(rioja)
-
 for(i in 1:length(vals)){
   #  This runs through each analogue distance
   keep.pol <- aaply(diag.dist, 1, 

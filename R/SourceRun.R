@@ -19,4 +19,4 @@ source(paste(file.lead, 'bootstrap_rfor.R', sep =''))
 cat('Done rFor/n')
 
 source(paste(file.lead, 'bootstrap_brt.R', sep =''))
-cat('Done rFor/n')
+cat('Done BRT/n')
