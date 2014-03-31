@@ -173,7 +173,7 @@ while(sum(!longlist$calc[longlist$who == analyst]) > 0){
       longlist$bias[i] <- (climate[px,10] - mean(prediction, na.rm=TRUE))^2
       longlist$expectation[i] <- mean((climate[px,10] - prediction)^2)
       longlist$variance[i] <- mean((mean(prediction) - prediction)^2)
-      longlist$calc <- TRUE
+      longlist$calc[i] <- TRUE
     }
     
     save(longlist, file=paste('data/longlist.', analyst, '.RData', sep=''))
