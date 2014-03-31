@@ -12,8 +12,22 @@ vals <- seq(0, 1, by=0.01)
 analyst <- ifelse(regexpr('goring', tolower(getwd()))>0, 'Simon', 'Sakari')
 
 if(paste('longlist.', analyst, '.RData', sep='') %in% list.files('data')){
-  paste('data/longlist.', analyst, '.RData', sep='')
+  load(paste('data/longlist.', analyst, '.RData', sep=''))
 }
+
+if(!exists('longlist')){
+  longlist <- data.frame(total.output, 
+                         calc = !is.na(total.output[,3]))
+}
+if(exists('longlist')){
+  if(any(is.na(longlist$bias) & !is.na(total.output$bias))){
+    longlist[is.na(longlist$bias) & !is.na(total.output$bias), colnames(total.output)] <-
+      total.output[is.na(longlist$bias) & !is.na(total.output$bias), ]
+  }
+}
+
+save(longlist, file=paste('data/longlist.', analyst, '.RData', sep=''))
+
 
 library(snowfall)
 
@@ -106,18 +120,6 @@ sfLibrary(randomForest)
 
 # Create a set of all possible xy pairs in the brt tables, and then look to see if
 # they've been sampled yet.
-if(!exists('longlist')){
-  longlist <- data.frame(total.output, 
-                       calc = !is.na(total.output[,3]))
-}
-if(exists('longlist')){
-  if(any(is.na(longlist$bias) & !is.na(total.output$bias))){
-    longlist[is.na(longlist$bias) & !is.na(total.output$bias), colnames(total.output)] <-
-      total.output[is.na(longlist$bias) & !is.na(total.output$bias), ]
-  }
-}
-
-save(longlist, file=paste('data/longlist.', analyst, '.RData', sep=''))
 
 calc.probvec <- function(x = longlist){
   #  Every once in a while, resample the probability data to make sure we're sampling in a
@@ -145,19 +147,22 @@ while(sum(!longlist$calc[longlist$who == analyst]) > 0){
   #  sampling with a huge long probability vector is insanely slow:
   i <- sample(nrow(longlist), 1)
   
-  if(rbinom(1, 1, longlist$prob.vec[i]) == 1){
+  if(rbinom(1, 1, longlist$prob.vec[i]) == 1 & longlist$who[i] == analyst){
   
+    cat('\nStarting', longlist$method[i], 'run. \n')
     keep.pol <- aaply(diag.dist, 1,
                       function(x) {x > vals[longlist$Var2[i]]})
     
     diag(keep.pol) <- FALSE
     
-    sfExport(list = list('keep.pol'))
+    sfExport(list = list('keep.pol', 'longlist'))
     
     px <- longlist[i,1]
     cx <- longlist[i,2]
     
     if(longlist$method[i] == 'brt'){
+      
+      
       
       prediction <- unlist(sfLapply(rep(px, 50), fun = brt.run))
       
@@ -184,7 +189,7 @@ while(sum(!longlist$calc[longlist$who == analyst]) > 0){
     
     st <- Sys.time()
     
-    cat(round(sum(!is.na(longlist$bias))/length(longlist$bias) * 100, 4), '% done on',
+    cat('\n',round(sum(!is.na(longlist$bias))/length(longlist$bias) * 100, 4), '% done on',
         weekdays(st), format(st, '%d'), months(st), format(st, '%Y'),
         'at', format(st, '%H:%M'),
         'in', round((end.time - run.time)[3]/60, 1), 'minutes.\n')
@@ -192,4 +197,5 @@ while(sum(!longlist$calc[longlist$who == analyst]) > 0){
   
   #  Every once in a while make sure we update which samples have been sampled & stuff.
   if(i%%50 == 0){longlist$prob.vec <- calc.probvec(longlist)}
+  cat('.')
 }
