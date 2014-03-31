@@ -28,7 +28,6 @@ if(exists('longlist')){
 
 save(longlist, file=paste('data/longlist.', analyst, '.RData', sep=''))
 
-
 library(snowfall)
 
 library(gbm)
@@ -51,10 +50,7 @@ subset.pol <- function(set){
   
 }
 
-brt.run <- function(input){
-  
-  px <- longlist[input,1]
-  pa <- longlist[input,2]
+brt.run <- function(px, pa){
   
   set <- keep.pol[px,]
   
@@ -85,11 +81,8 @@ brt.run <- function(input){
   
 }
 
-rfor.run <- function(input){
-  
-  px <- longlist[input,1]
-  pa <- longlist[input,2]
-  
+rfor.run <- function(px, pa){
+
   set <- keep.pol[px,]
   
   x <- subset.pol(set)
@@ -155,16 +148,14 @@ while(sum(!longlist$calc[longlist$who == analyst]) > 0){
     
     diag(keep.pol) <- FALSE
     
-    sfExport(list = list('keep.pol', 'longlist'))
+    sfExport(list = list('keep.pol'))
     
     px <- longlist[i,1]
-    cx <- longlist[i,2]
+    pa <- longlist[i,2]
     
     if(longlist$method[i] == 'brt'){
-      
-      
-      
-      prediction <- unlist(sfLapply(rep(px, 50), fun = brt.run))
+            
+      prediction <- unlist(sfLapply(rep(px, 50), fun = brt.run, pa = pa))
       
       longlist$mean_prediction[i] <- mean(prediction, na.rm=TRUE)
       longlist$sample_size[i] <- sum(keep.pol[px,], na.rm=TRUE)
@@ -174,7 +165,7 @@ while(sum(!longlist$calc[longlist$who == analyst]) > 0){
     }
     if(longlist$method[i] == 'rfor'){
       
-      prediction <- unlist(sfLapply(rep(px, 50), fun = rfor.run))
+      prediction <- unlist(sfLapply(rep(px, 50), fun = rfor.run, pa = pa))
       
       longlist$mean_prediction[i] <- mean(prediction, na.rm=TRUE)
       longlist$sample_size[i] <- sum(keep.pol[px,], na.rm=TRUE)
