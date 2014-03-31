@@ -189,4 +189,7 @@ while(sum(!longlist$calc[longlist$who == analyst]) > 0){
         'at', format(st, '%H:%M'),
         'in', round((end.time - run.time)[3]/60, 1), 'minutes.\n')
   }
+  
+  #  Every once in a while make sure we update which samples have been sampled & stuff.
+  if(i%%50 == 0){longlist$prob.vec <- calc.probvec(longlist)}
 }
