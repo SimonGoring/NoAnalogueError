@@ -86,8 +86,6 @@ for(k in samp){
   keep.pol <- aaply(diag.dist, 1, 
                     function(x) {x > vals[i]})
   diag(keep.pol) <- FALSE
-  
-  sfExport(list = list('keep.pol'))
     
   if(is.na(rfor.res$mean_prediction[j,i])){
     #  Run randomForest with raw defaults
