@@ -125,7 +125,7 @@ calc.probvec <- function(x = longlist){
   
   #  Then we want to fill in points based on how rarely they've been sampled:
   prob.vec <- prob.vec + rep(1/table(x[!is.na(x$bias),1]), max(x[,2])*2)
-  prob.vec[!is.na(x$bias)] <- 0
+  prob.vec[x$calc == TRUE] <- 0
   
   prob.vec
 
@@ -162,6 +162,7 @@ while(sum(!longlist$calc[longlist$who == analyst]) > 0){
       longlist$bias[i] <- (climate[px,10] - mean(prediction, na.rm=TRUE))^2
       longlist$expectation[i] <- mean((climate[px,10] - prediction)^2)
       longlist$variance[i] <- mean((mean(prediction) - prediction)^2)
+      longlist$calc[i] <- TRUE
     }
     if(longlist$method[i] == 'rfor'){
       
@@ -172,6 +173,7 @@ while(sum(!longlist$calc[longlist$who == analyst]) > 0){
       longlist$bias[i] <- (climate[px,10] - mean(prediction, na.rm=TRUE))^2
       longlist$expectation[i] <- mean((climate[px,10] - prediction)^2)
       longlist$variance[i] <- mean((mean(prediction) - prediction)^2)
+      longlist$calc <- TRUE
     }
     
     save(longlist, file=paste('data/longlist.', analyst, '.RData', sep=''))
