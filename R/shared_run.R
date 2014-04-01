@@ -90,7 +90,7 @@ rfor.run <- function(px, pa){
   zeros <- colSums(x$calib.pol, na.rm = TRUE) == 0
   
   rfor <- try(randomForest(x = x$calib.pol[,!zeros], 
-                           y = x$calib.clim))
+                           y = x$calib.clim$tjul))
   
   if (length(rfor) > 1){
     output <- predict(rfor, newdata = new.pol[px, !zeros])
