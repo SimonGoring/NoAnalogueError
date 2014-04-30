@@ -35,6 +35,11 @@ When we examine the dissimilarity scores we can see that the distribution betwee
 
 **Figure 2**.  *Distribution of squared-chord dissimilarity values.  The 95% confidence interval for the minumum spanning distance in the North American Modern Pollen Database is 0.10 - 0.48.  We choose 0.48 as our cut-off for 'non-analogue' distances in the database.*
 
+
+```
+## Error: object 'X' not found
+```
+
 ![Figure: North American site MDS scores](figure/Fig3SiteMDS.png) 
 
 **Figure 3**. *Location of non-analogue points in the modern pollen data, presented within a non-metric multidimensional scaling ordination (Panel 1) and geographically.  Interestingly, although a number of geographically isolated points exist in the dataset, the majority of non-analogue points exist within the most dense region of sampling, indicating that non-analogue sites are not ecologically stratified.*
