@@ -12,6 +12,7 @@ library(vegan)
 library(maps)
 library(maptools)
 library(ggmap)
+library(reshape2)
 
 climate <- read.csv('data/Clim_Pollen_Zirbel.csv', row.names=1)
 mod_pol <- read.csv('data/ModP35c_East.csv', row.names=1, sep='\t')
