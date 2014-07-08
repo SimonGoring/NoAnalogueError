@@ -1,4 +1,5 @@
 library(snowfall)
+library(analogue)
 
 sfStop()
 sfInit(parallel = TRUE, cpus = 6)
@@ -88,11 +89,8 @@ for(i in i:length(vals)){
     }
      
   }
-  if(ncol(wa.res$bias) > i){
-    if(!sum(is.na(wa.res$bias[,i+1])) == 0){
-      save(wa.res, file = 'data/wa.res.RData')
-    }
-  }
+  
+  save(wa.res, file = 'data/wa.res.RData')
   
   cat(i)  
   
