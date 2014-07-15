@@ -21,5 +21,3 @@ dump.it <- function(x, y, set){
 
 rfor.res <- dump.it(longlist, rfor.res, 'rfor')
 brt.res <- dump.it(longlist, brt.res, 'brt')
-
-
