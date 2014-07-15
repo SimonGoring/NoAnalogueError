@@ -1,7 +1,7 @@
 library(snowfall)
 
 sfStop()
-sfInit(parallel = TRUE, cpus = 3)
+sfInit(parallel = TRUE, cpus = 6)
 
 # Set up the analogue distance exclusion values.
 #  This was originally a set of quantiles, but it played havoc on plotting and
@@ -94,5 +94,5 @@ for(i in i:length(vals)){
   }
     
   save(mat.res, file = 'data/mat.res.RData')
-  cat(i)
+  cat(i, '\n')
 }

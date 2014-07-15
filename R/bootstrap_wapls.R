@@ -74,7 +74,7 @@ for(i in 1:length(vals)){
   for(j in 1:nrow(new.pol)){
     
     if(is.na(wapls.res$mean_prediction[j,i])){
-      #  Run WA with monotonic deshrinking.
+      #  Run WAPLS
       prediction <- unlist(sfLapply(rep(j, 100), fun = wapls.run))
     
       wapls.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)

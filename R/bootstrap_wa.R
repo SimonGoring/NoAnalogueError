@@ -2,7 +2,7 @@ library(snowfall)
 library(analogue)
 
 sfStop()
-sfInit(parallel = TRUE, cpus = 6)
+sfInit(parallel = TRUE, cpus = 4)
 
 # Set up the analogue distance exclusion values.
 #  This was originally a set of quantiles, but it played havoc on plotting and
