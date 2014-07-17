@@ -3,7 +3,7 @@ library(snowfall)
 library(randomForest)
 
 sfStop()
-sfInit(parallel = TRUE, cpus = 6)
+sfInit(parallel = TRUE, cpus = 8)
 
 vals <- seq(0, 1, by=0.01)
 
@@ -39,9 +39,10 @@ rfor.run <- function(j){
   x <- subset.pol(set)
   
   zeros <- colSums(x$calib.pol, na.rm = TRUE) == 0
+  bad.clim <- is.na(x$calib.clim)
   
-  rfor <- try(randomForest(x=x$calib.pol[,!zeros], 
-                     y = x$calib.clim))
+  rfor <- try(randomForest(x=x$calib.pol[!bad.clim, !zeros], 
+                     y = x$calib.clim[!bad.clim]))
   
   if (length(rfor) > 1){
     output <- predict(rfor, newdata = new.pol[j,!zeros])
@@ -54,11 +55,9 @@ rfor.run <- function(j){
 }
 
 #  Parallelize:
-sfExport(list = list('rfor.run'))
-sfExport(list = list('new.pol'))
-sfExport(list = list('subset.pol'))
-sfExport(list = list('climate'))
+sfExport(list = list('rfor.run', 'new.pol', 'subset.pol', 'climate'))
 sfLibrary(randomForest)
+sfClusterSetupRNG()
 
 #  Create a set of all possible xy pairs in the rfor tables, and then look to see if
 #  they've been sampled yet.
@@ -103,7 +102,7 @@ for(k in samp){
     
   if(is.na(rfor.res$mean_prediction[j,i])){
     #  Run randomForest with raw defaults
-    prediction <- unlist(sfLapply(rep(j, 50), fun = rfor.run))
+    prediction <- unlist(sfLapply(rep(j, 30), fun = rfor.run))
   
     rfor.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
     rfor.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
