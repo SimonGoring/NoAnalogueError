@@ -40,9 +40,10 @@ wapls.run <- function(j){
   x <- subset.pol(set)
   
   zeros <- colSums(x$calib.pol, na.rm = TRUE) == 0
+  bad.clim <- is.na(x$calib.clim)
   
-  wapls <- try(WAPLS(y=x$calib.pol[,!zeros], 
-                     x = x$calib.clim))
+  wapls <- try(WAPLS(y=x$calib.pol[!bad.clim, !zeros], 
+                     x = x$calib.clim[!bad.clim]))
   
   if (length(wapls) > 1){
     pred.wapls <- predict(wapls, newdata = new.pol[j,!zeros])

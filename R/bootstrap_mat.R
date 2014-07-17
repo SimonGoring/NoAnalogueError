@@ -80,7 +80,7 @@ for(i in i:length(vals)){
 
   for(j in 1:nrow(new.pol)){
 
-    prediction <- unlist(sfLapply(1:100, mat.fun, j = j, min = which.min(rmse)))
+    prediction <- unlist(sfLapply(1:30, mat.fun, j = j, min = which.min(rmse)))
     
     if(is.na(mat.res$mean_prediction[j,i])){
       mat.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)

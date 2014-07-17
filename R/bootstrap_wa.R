@@ -40,9 +40,10 @@ wa.run <- function(j){
   x <- subset.pol(set)
   
   zeros <- colSums(x$calib.pol, na.rm = TRUE) == 0
+  bad.clim <- is.na(x$calib.clim)
   
-  pred.wa <- try(predict(wa(x=x$calib.pol, 
-                            env = x$calib.clim, 
+  pred.wa <- try(predict(wa(x=x$calib.pol[!bad.clim, ], 
+                            env = x$calib.clim[!bad.clim], 
                             deshrinking='monotonic'), 
                          newdata = new.pol[j,!x$zeros]))
   
@@ -79,7 +80,7 @@ for(i in i:length(vals)){
     
     if(is.na(wa.res$mean_prediction[j,i])){
       #  Run WA with monotonic deshrinking.
-      prediction <- unlist(sfLapply(rep(j, 100), fun = wa.run))
+      prediction <- unlist(sfLapply(rep(j, 30), fun = wa.run))
     
       wa.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
       wa.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
