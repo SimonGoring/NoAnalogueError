@@ -3,7 +3,7 @@ library(snowfall)
 library(randomForest)
 
 sfStop()
-sfInit(parallel = TRUE, cpus = 8)
+sfInit(parallel = TRUE, cpus = 30)
 
 vals <- seq(0, 1, by=0.01)
 
@@ -34,7 +34,7 @@ subset.pol <- function(set){
 
 rfor.run <- function(j){
   
-  set <- keep.pol[j,]
+  set <- keep.pol
   
   x <- subset.pol(set)
   
@@ -89,36 +89,42 @@ longlist <- longlist[longlist[,3],]
 
 for(k in samp){
   #  This runs through each analogue distance
+  
   run.time <- proc.time()
   
   i <- longlist[k,2]
   j <- longlist[k,1]
   
-  keep.pol <- aaply(diag.dist, 1, 
-                    function(x) {x > vals[i]})
-  diag(keep.pol) <- FALSE
-  
-  sfExport(list = list('keep.pol'))
-    
+  if(!is.na(rfor.res$mean_prediction[j,i])){
+    cat('.')
+  }
   if(is.na(rfor.res$mean_prediction[j,i])){
+    
+    keep.pol <- aaply(diag.dist, 1, 
+                      function(x) {x[j] > vals[i]})
+    
+    keep.pol[j] <- FALSE
+    
+    sfExport(list = list('keep.pol'))
+      
     #  Run randomForest with raw defaults
     prediction <- unlist(sfLapply(rep(j, 30), fun = rfor.run))
   
     rfor.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
-    rfor.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
+    rfor.res$sample_size[j,i] <- sum(keep.pol[j], na.rm=TRUE)
     rfor.res$bias[j, i] <- (climate[j,10] - mean(prediction, na.rm=TRUE))^2
     rfor.res$expectation[j, i]  <- mean((climate[j,10] - prediction)^2)
     rfor.res$variance[j, i]  <- mean((mean(prediction) - prediction)^2)
+  
+    save(rfor.res, file = 'data/rfor.res.RData')
+    
+    end.time <- proc.time()
+    
+    st <- Sys.time()
+    
+    cat(round(sum(!is.na(rfor.res$bias))/length(rfor.res$bias) * 100, 4), '% done on', 
+        weekdays(st), format(st, '%d'), months(st), format(st, '%Y'),
+        'at', format(st, '%H:%M'),
+        'in', round((end.time - run.time)[3]/60, 1), 'minutes.\n')
   }
-
-  save(rfor.res, file = 'data/rfor.res.RData')
-  
-  end.time <- proc.time()
-  
-  st <- Sys.time()
-  
-  cat(round(sum(!is.na(rfor.res$bias))/length(rfor.res$bias) * 100, 4), '% done on', 
-      weekdays(st), format(st, '%d'), months(st), format(st, '%Y'),
-      'at', format(st, '%H:%M'),
-      'in', round((end.time - run.time)[3]/60, 1), 'minutes.\n')
 }
