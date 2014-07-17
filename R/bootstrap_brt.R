@@ -124,7 +124,7 @@ for(k in samp){
     
   if(is.na(brt.res$mean_prediction[j,i])){
 
-    prediction <- unlist(sfLapply(rep(j, 50), fun = brt.run))
+    prediction <- unlist(sfLapply(rep(j, 30), fun = brt.run))
   
     brt.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
     brt.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
