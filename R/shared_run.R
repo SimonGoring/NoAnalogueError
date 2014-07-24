@@ -10,7 +10,7 @@ vals <- seq(0, 1, by=0.01)
 #  Sakari, I doubt it will, but you need to make sure that 'goring' isn't anywhere in your
 #  working directory path!
 #analyst <- ifelse(regexpr('goring', tolower(getwd()))>0, 'Simon', 'Sakari')
-analyst <- 'Simon'
+analyst <- 'Work'
 
 if(paste('longlist.', analyst, '.RData', sep='') %in% list.files('data')){
   load(paste0('data/longlist.', analyst, '.RData'))
@@ -34,6 +34,7 @@ library(gbm)
 
 sfStop()
 sfInit(parallel = TRUE, cpus = 4)
+
 
 subset.pol <- function(set){
   
