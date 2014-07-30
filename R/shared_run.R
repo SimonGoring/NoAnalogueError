@@ -33,7 +33,7 @@ library(snowfall)
 library(gbm)
 
 sfStop()
-sfInit(parallel = TRUE, cpus = 4)
+sfInit(parallel = TRUE, cpus = 3)
 
 
 subset.pol <- function(set){
