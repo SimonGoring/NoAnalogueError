@@ -7,7 +7,6 @@ Non-analogues in paleoecological reconstruction - the effects of analogue distan
 
 
 
-
 Introduction
 =========================
 Pollen assemblages are widely used for paleoclimatic reconstruction during the Holocene, but this method is also applied to pollen assemblages from the last Glacial period (Bartlein et al., 2011), as well as to earlier pollen assemblages, such as those during the Eemian (Brewer et al, 2008).  A particular challenge for climate reconstruction using these much earlier samples is the presence of non-analogue vegetation.  Non-analogue pollen assemblages pose a problem for many reconstruction techniques, these vegetation assemblages may be the result of sets of climate variables that no longer co-exist, ecological conditions resulting from differing rates of species migration or release from herbivores (Gill et al., 2009), or as a result of changes in human land use (St. Jacques?, maybe not the best. . .).  
@@ -22,7 +21,6 @@ Methods:
 Sites from across North America were used to build a modern analogue dataset.
 
 ![Figure: North American site locations](figure/Fig1SiteLocations.png) 
-
 **Figure 1**. Location of sample plots used for analysis.  Samples are derived from a modern pollen dataset.
 
 
@@ -32,23 +30,15 @@ Results
 When we examine the dissimilarity scores we can see that the distribution between minimum, maximum and overall dissimilarities can be understood numerically and spatially.
 
 ![Figure: North American site locations](figure/Fig2MinDissim.png) 
-
 **Figure 2**.  *Distribution of squared-chord dissimilarity values.  The 95% confidence interval for the minumum spanning distance in the North American Modern Pollen Database is 0.10 - 0.48.  We choose 0.48 as our cut-off for 'non-analogue' distances in the database.*
 
-
-```
-## Error: object 'X' not found
-```
-
 ![Figure: North American site MDS scores](figure/Fig3SiteMDS.png) 
-
 **Figure 3**. *Location of non-analogue points in the modern pollen data, presented within a non-metric multidimensional scaling ordination (Panel 1) and geographically.  Interestingly, although a number of geographically isolated points exist in the dataset, the majority of non-analogue points exist within the most dense region of sampling, indicating that non-analogue sites are not ecologically stratified.*
 
 Climate Variables
 =========================
 
 We used the 2289 records from the North American Modern Pollen Database and associated climate data to provide reconstructions of key climatic variables. The process of calculating the lambda/lambda ratio from RDA (ref) produces interesting relationships, perhaps impacted by the breadth of the available climate and pollen data across North America.
-
 
 
 
@@ -70,19 +60,15 @@ Model outputs
 Once the climate variables of interest were established we began by bootstrapping the models for these climate variables.  From the total pool of samples we generate a calibration dataset by sampling with replacement.  
 
 ![plot of chunk Fig4SampleLoss](figure/Fig4SampleLoss.png) 
-
 **Figure 4**. *As the analogue distance exclusion is increased the available data set size is reduced, although some points continue to maintain a large number of potential analogues, this is directly related to the minimum distance to the closest analogue.  Points that maintain a large pool of analogues are far from neighbours.*
 
 ![plot of chunk Fig5PredictedValues](figure/Fig5PredictedValues.png) 
-
 **Figure 5**. *Change in site predictions over time.  Of great interest is the difference between model outputs as the exclusion zone increases.  MAT can never predict beyond the extent of the data samples in the pool, and so as the exclusion zone increases the predictions move toward the dataset mean.  WAPLS uses an initial transformation and then regresses against it to predict new values, so as the exclusion zone increases we see an increase in the spread of the predicted values, with much greater variability and a loss of accuracy.*
 
 ![plot of chunk Fig6BiasValues](figure/Fig6BiasValues.png) 
-
 **Figure 6**. *Change in bias over time.*
 
 ![plot of chunk Fig7VarianceValues](figure/Fig7VarianceValues.png) 
-
 **Figure 7**. *Change in site variance over time.*
 
 
