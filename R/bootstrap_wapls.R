@@ -47,7 +47,7 @@ wapls.run <- function(j){
   
   if (length(wapls) > 1){
     pred.wapls <- predict(wapls, newdata = new.pol[j,!zeros])
-    output    <- pred.wapls$fit[which.min(performance(wapls)$object[,1])]
+    output     <- pred.wapls$fit[which.min(rioja::performance(wapls)$object[,1])]
     }
   else{
     output <- NA
@@ -90,5 +90,3 @@ for(i in 1:length(vals)){
   save(wapls.res, file = 'data/wapls.res.RData')
   cat(i)
 }
-
-  
