@@ -1,7 +1,7 @@
 #  Run all bootstraps:
 source('R/data_setup.R')
 
-par <- FALSE
+par <- TRUE
 
 file.lead <- ifelse(par == TRUE, 'R/', 'R/nonPar/')
 
