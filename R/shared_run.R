@@ -9,10 +9,11 @@ vals <- seq(0, 1, by=0.01)
 
 #  Sakari, I doubt it will, but you need to make sure that 'goring' isn't anywhere in your
 #  working directory path!
-analyst <- ifelse(regexpr('goring', tolower(getwd()))>0, 'Simon', 'Sakari')
+#analyst <- ifelse(regexpr('goring', tolower(getwd()))>0, 'Simon', 'Sakari')
+analyst <- 'Work'
 
 if(paste('longlist.', analyst, '.RData', sep='') %in% list.files('data')){
-  load(paste('data/longlist.', analyst, '.RData', sep=''))
+  load(paste0('data/longlist.', analyst, '.RData'))
 }
 
 if(!exists('longlist')){
@@ -29,11 +30,11 @@ if(exists('longlist')){
 save(longlist, file=paste('data/longlist.', analyst, '.RData', sep=''))
 
 library(snowfall)
-
 library(gbm)
 
 sfStop()
-sfInit(parallel = TRUE, cpus = 2)
+sfInit(parallel = TRUE, cpus = 3)
+
 
 subset.pol <- function(set){
   
@@ -52,11 +53,12 @@ subset.pol <- function(set){
 
 brt.run <- function(px, pa){
   
-  set <- keep.pol[px,]
+  set <- keep.pol
   
   x <- subset.pol(set)
   
   zeros <- colSums(x$calib.pol, na.rm = TRUE) == 0
+  bad.clim <- is.na(x$calib.clim)
   
   # Construct the brt formula based on x$calib.clim and x$calib.pol column 
   # names, omitting the zero-sum taxa which won't be used.
@@ -66,12 +68,14 @@ brt.run <- function(px, pa){
   # Construct brt model. x$calib.clim and x$calib.pol combined into a single
   # data frame and passed as the "data" parameter.
   
-  brt.model <- gbm(brt.formula, distribution="gaussian", n.trees=500, shrinkage=0.005, interaction.depth=6, cv.folds=4, verbose=FALSE, data=cbind(x$calib.clim, x$calib.pol[,!zeros]))
+  brt.model <- try(gbm(brt.formula, distribution="gaussian", 
+                   n.trees=500, shrinkage=0.005, interaction.depth=6, 
+                   cv.folds=4, verbose=FALSE, 
+                   data=cbind(x$calib.clim, x$calib.pol[,!zeros])[!bad.clim,]))
   
+  if(length(brt.model) > 1){
   # This probably always returns 500
-  brt.ntrees <- gbm.perf(brt.model, method="cv", plot.it=FALSE)   
-  
-  if (length(brt.model) > 1){
+    brt.ntrees <- gbm.perf(brt.model, method="cv", plot.it=FALSE)   
     output <- predict(brt.model, new.pol[px,!zeros], brt.ntrees, type="response")
   }
   else{
@@ -83,14 +87,15 @@ brt.run <- function(px, pa){
 
 rfor.run <- function(px, pa){
 
-  set <- keep.pol[px,]
+  set <- keep.pol
   
   x <- subset.pol(set)
   
   zeros <- colSums(x$calib.pol, na.rm = TRUE) == 0
+  bad.clim <- is.na(x$calib.clim)
   
-  rfor <- try(randomForest(x = x$calib.pol[,!zeros], 
-                           y = x$calib.clim$tjul))
+  rfor <- try(randomForest(x = x$calib.pol[!bad.clim, !zeros], 
+                           y = x$calib.clim$tjul[!bad.clim]))
   
   if (length(rfor) > 1){
     output <- predict(rfor, newdata = new.pol[px, !zeros])
@@ -117,14 +122,20 @@ sfLibrary(randomForest)
 calc.probvec <- function(x = longlist){
   #  Every once in a while, resample the probability data to make sure we're sampling in a
   #  reasonable way from the dataset.
-  prob.vec <- rep(0, nrow(x))
   
+  #  Default is to sample it:
+  prob.vec <- rep(1, nrow(x))
+  
+  #  If rfor had been sampled then brt should be given preference.
   rfor.sampled <- which(x$method == 'rfor' & x$bias == FALSE)
-  
   prob.vec[x$method == 'brt'][rfor.sampled] <- 1
   
   #  Then we want to fill in points based on how rarely they've been sampled:
-  prob.vec <- prob.vec + rep(1/table(x[!is.na(x$bias),1]), max(x[,2])*2)
+  x1.sampled <- rep(rep(table(factor(x[,1])[is.na(x$bias)]) / 202, each = 101)^2, 2)
+  x2.sampled <- rep(rep(table(factor(x[,2])[is.na(x$bias)]) / 3874, 1937)^2, 2)
+  
+  prob.vec <- (prob.vec + x1.sampled + x2.sampled) / 3
+    
   prob.vec[x$calc == TRUE] <- 0
   
   prob.vec
@@ -143,10 +154,10 @@ while(sum(!longlist$calc[longlist$who == analyst]) > 0){
   if(rbinom(1, 1, longlist$prob.vec[i]) == 1 & longlist$who[i] == analyst){
   
     cat('\nStarting', longlist$method[i], 'run. \n')
-    keep.pol <- aaply(diag.dist, 1,
-                      function(x) {x > vals[longlist$Var2[i]]})
-    
-    diag(keep.pol) <- FALSE
+    keep.pol <- aaply(diag.dist, 1, 
+                    function(x) {x[longlist$Var1[i]] > vals[longlist$Var2[i]]})
+     
+    keep.pol[longlist$Var1[i]] <- FALSE
     
     sfExport(list = list('keep.pol'))
     
@@ -155,10 +166,10 @@ while(sum(!longlist$calc[longlist$who == analyst]) > 0){
     
     if(longlist$method[i] == 'brt'){
             
-      prediction <- unlist(sfLapply(rep(px, 50), fun = brt.run, pa = pa))
+      prediction <- unlist(sfLapply(rep(px, 30), fun = brt.run, pa = pa))
       
       longlist$mean_prediction[i] <- mean(prediction, na.rm=TRUE)
-      longlist$sample_size[i] <- sum(keep.pol[px,], na.rm=TRUE)
+      longlist$sample_size[i] <- sum(keep.pol, na.rm=TRUE)
       longlist$bias[i] <- (climate[px,10] - mean(prediction, na.rm=TRUE))^2
       longlist$expectation[i] <- mean((climate[px,10] - prediction)^2)
       longlist$variance[i] <- mean((mean(prediction) - prediction)^2)
@@ -166,10 +177,10 @@ while(sum(!longlist$calc[longlist$who == analyst]) > 0){
     }
     if(longlist$method[i] == 'rfor'){
       
-      prediction <- unlist(sfLapply(rep(px, 50), fun = rfor.run, pa = pa))
+      prediction <- unlist(sfLapply(rep(px, 30), fun = rfor.run, pa = pa))
       
       longlist$mean_prediction[i] <- mean(prediction, na.rm=TRUE)
-      longlist$sample_size[i] <- sum(keep.pol[px,], na.rm=TRUE)
+      longlist$sample_size[i] <- sum(keep.pol, na.rm=TRUE)
       longlist$bias[i] <- (climate[px,10] - mean(prediction, na.rm=TRUE))^2
       longlist$expectation[i] <- mean((climate[px,10] - prediction)^2)
       longlist$variance[i] <- mean((mean(prediction) - prediction)^2)
