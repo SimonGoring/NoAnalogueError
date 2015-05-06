@@ -11,7 +11,7 @@ library(snowfall)
 library(gbm)
 
 sfStop()
-sfInit(parallel = TRUE, cpus = 6)
+sfInit(parallel = TRUE, cpus = 30)
 
 vals <- seq(0, 1, by=0.01)
 
@@ -50,16 +50,23 @@ brt.run <- function(j){
   x <- subset.pol(set)
   
   zeros <- colSums(x$calib.pol, na.rm = TRUE) == 0
+  bad.clim <- is.na(x$calib.clim)
 
   # Construct the brt formula based on x$calib.clim and x$calib.pol column 
   # names, omitting the zero-sum taxa which won't be used.
   
-  brt.formula <- as.formula(paste (colnames(x$calib.clim)[1], "~", paste(colnames(x$calib.pol)[!zeros], collapse=" + ")))     
+  brt.formula <- as.formula(paste (colnames(x$calib.clim)[1], "~", 
+                                   paste(colnames(x$calib.pol)[!zeros], collapse=" + ")))
 
   # Construct brt model. x$calib.clim and x$calib.pol combined into a single
   # data frame and passed as the "data" parameter.
   
-  brt.model <- gbm(brt.formula, distribution="gaussian", n.trees=500, shrinkage=0.005, interaction.depth=6, cv.folds=4, verbose=FALSE, data=cbind(x$calib.clim, x$calib.pol[,!zeros]))
+  brt.model <- gbm(brt.formula, distribution="gaussian", 
+                   n.trees=500, shrinkage=0.005, 
+                   interaction.depth=6, cv.folds=4, 
+                   verbose=FALSE, 
+                   data=cbind(x$calib.clim, 
+                              x$calib.pol[,!zeros])[!bad.clim,])
 
   # This probably always returns 500
   brt.ntrees <- gbm.perf(brt.model, method="cv", plot.it=FALSE)   
@@ -118,13 +125,14 @@ for(k in samp){
   
   keep.pol <- aaply(diag.dist, 1,
                     function(x) {x > vals[i]})
+  
   diag(keep.pol) <- FALSE
   
   sfExport(list = list('keep.pol'))
     
   if(is.na(brt.res$mean_prediction[j,i])){
 
-    prediction <- unlist(sfLapply(rep(j, 50), fun = brt.run))
+    prediction <- unlist(sfLapply(rep(j, 30), fun = brt.run))
   
     brt.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
     brt.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)

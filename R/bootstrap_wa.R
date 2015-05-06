@@ -1,7 +1,8 @@
 library(snowfall)
+library(analogue)
 
 sfStop()
-sfInit(parallel = TRUE, cpus = 6)
+sfInit(parallel = TRUE, cpus = 30)
 
 # Set up the analogue distance exclusion values.
 #  This was originally a set of quantiles, but it played havoc on plotting and
@@ -39,9 +40,10 @@ wa.run <- function(j){
   x <- subset.pol(set)
   
   zeros <- colSums(x$calib.pol, na.rm = TRUE) == 0
+  bad.clim <- is.na(x$calib.clim)
   
-  pred.wa <- try(predict(wa(x=x$calib.pol, 
-                            env = x$calib.clim, 
+  pred.wa <- try(predict(wa(x=x$calib.pol[!bad.clim, ], 
+                            env = x$calib.clim[!bad.clim], 
                             deshrinking='monotonic'), 
                          newdata = new.pol[j,!x$zeros]))
   
@@ -78,7 +80,7 @@ for(i in i:length(vals)){
     
     if(is.na(wa.res$mean_prediction[j,i])){
       #  Run WA with monotonic deshrinking.
-      prediction <- unlist(sfLapply(rep(j, 100), fun = wa.run))
+      prediction <- unlist(sfLapply(rep(j, 30), fun = wa.run))
     
       wa.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
       wa.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
@@ -88,11 +90,8 @@ for(i in i:length(vals)){
     }
      
   }
-  if(ncol(wa.res$bias) > i){
-    if(!sum(is.na(wa.res$bias[,i+1])) == 0){
-      save(wa.res, file = 'data/wa.res.RData')
-    }
-  }
+  
+  save(wa.res, file = 'data/wa.res.RData')
   
   cat(i)  
   
