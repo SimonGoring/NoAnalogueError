@@ -8,12 +8,17 @@ sfInit(parallel = TRUE, cpus = 30)
 #  didn't seem to add much to the understanding of what was going on.
 vals <- seq(0, 1, by=0.01)
 
-mat.res <- list(mean_prediction  = matrix(ncol=length(vals), nrow=nrow(new.pol)),
-                sample_size      = matrix(ncol=length(vals), nrow=nrow(new.pol)),
-                bias             = matrix(ncol=length(vals), nrow=nrow(new.pol)),
-                variance         = matrix(ncol=length(vals), nrow=nrow(new.pol)),
-                expectation      = matrix(ncol=length(vals), nrow=nrow(new.pol)))
+if('mat.res.RData' %in% list.files('data')){
+  load('data/mat.res.RData')
+} else {
+  
+  mat.res <- list(mean_prediction  = matrix(ncol=length(vals), nrow=nrow(new.pol)),
+                  sample_size      = matrix(ncol=length(vals), nrow=nrow(new.pol)),
+                  bias             = matrix(ncol=length(vals), nrow=nrow(new.pol)),
+                  variance         = matrix(ncol=length(vals), nrow=nrow(new.pol)),
+                  expectation      = matrix(ncol=length(vals), nrow=nrow(new.pol)))
 
+}  
 #  Turn the distance table into a matrix.
 diag.dist <- as.matrix(dists); diag(diag.dist) <- NA
 
@@ -80,9 +85,8 @@ for(i in i:length(vals)){
 
   for(j in 1:nrow(new.pol)){
 
-    prediction <- unlist(sfLapply(1:30, mat.fun, j = j, min = which.min(rmse)))
-    
     if(is.na(mat.res$mean_prediction[j,i])){
+      prediction <- unlist(sfLapply(1:30, mat.fun, j = j, min = which.min(rmse)))
       mat.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
       mat.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
       mat.res$bias[j, i] <- (climate[j,10] - mean(prediction, na.rm=TRUE))^2
