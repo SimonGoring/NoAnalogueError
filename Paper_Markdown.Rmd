@@ -43,7 +43,7 @@ ggplot(data = data.frame(map), aes(long, lat)) +
 ```
 **Figure 1**. *Location of sample plots used for analysis.  Samples are derived from a modern pollen dataset.*
 
-To analyse the effects of non-analogue pollen on model skill we chose five pollen-based reconstruction methods from the literature and apply them to the modern pollen data from eastern North America.  The models are MAT, WA, WAPLS, BRT and randomForest.  Each of these models has been used previously in the pollen literature, and has strengths and weaknesses.  MAT (Overpeck, 1985) is commonly applied to reconstruct climate, for pollen, diatoms, chironomids and other taxa.  WA has a long history in the literature, and the recent development of monotone deshrinking has apparently improved performance further (Simpson, 2014?), but WA continues to suffer fro a basic assumption of unimodal taxon distributions along climate gradients.  
+To analyse the effects of non-analogue pollen on model skill we chose five pollen-based reconstruction methods from the literature and apply them to the modern pollen data from eastern North America.  The models are MAT, WA, WAPLS, BRT and randomForest.  Each of these models has been used previously in the pollen literature, and has strengths and weaknesses.  MAT (Overpeck, 1985) is commonly applied to reconstruct climate, for pollen, diatoms, chironomids and other taxa.  WA has a long history in the literature, and the recent development of monotone deshrinking has apparently improved performance further (Simpson, 2014?), but WA continues to suffer from a basic assumption of unimodal taxon distributions along climate gradients.  
 
 Results
 =========================
