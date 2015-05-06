@@ -71,32 +71,33 @@ sfExport(list = list('climate'))
 for(i in i:length(vals)){
   #  At each quantile, figure out which samples should be acceptable for a calibration set targeting
   #  each sample return 'keep.pol'
-  keep.pol <- aaply(diag.dist, 1, 
-                    function(x) {x > vals[i]})
 
-  diag(keep.pol) <- FALSE
-  
   if(any(is.na(mat.res$mean_prediction[,i]))){
+    keep.pol <- aaply(diag.dist, 1, 
+                      function(x) {x > vals[i]})
+    
+    diag(keep.pol) <- FALSE
+    
     fast.mat <- laply(1:nrow(diag.dist), fmat)
     rmse <- aaply(fast.mat, 2, function(x) sqrt(mean((x - climate[,10])^2, na.rm = T)))
-  }
   
-  sfExport(list = list('keep.pol'))
-
-  for(j in 1:nrow(new.pol)){
-
-    if(is.na(mat.res$mean_prediction[j,i])){
-      prediction <- unlist(sfLapply(1:30, mat.fun, j = j, min = which.min(rmse)))
-      mat.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
-      mat.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
-      mat.res$bias[j, i] <- (climate[j,10] - mean(prediction, na.rm=TRUE))^2
-      mat.res$expectation[j, i]  <- mean((climate[j,10] - prediction)^2, na.rm=TRUE)
-      mat.res$variance[j, i]  <- mean((mean(prediction, na.rm=TRUE) - prediction)^2, na.rm=TRUE)
+    sfExport(list = list('keep.pol'))
+  
+    for(j in 1:nrow(new.pol)){
+  
+      if(is.na(mat.res$mean_prediction[j,i])){
+        prediction <- unlist(sfLapply(1:30, mat.fun, j = j, min = which.min(rmse)))
+        mat.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
+        mat.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
+        mat.res$bias[j, i] <- (climate[j,10] - mean(prediction, na.rm=TRUE))^2
+        mat.res$expectation[j, i]  <- mean((climate[j,10] - prediction)^2, na.rm=TRUE)
+        mat.res$variance[j, i]  <- mean((mean(prediction, na.rm=TRUE) - prediction)^2, na.rm=TRUE)
+      }
+  
+      
     }
-
-    
+      
+    save(mat.res, file = 'data/mat.res.RData')
   }
-    
-  save(mat.res, file = 'data/mat.res.RData')
   cat(i, '\n')
 }
