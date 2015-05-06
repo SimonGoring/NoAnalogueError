@@ -13,11 +13,20 @@ library(maps)
 library(maptools)
 library(ggmap)
 library(reshape2)
+library(analogue)
 
 climate <- read.csv('data/Clim_Pollen_Zirbel.csv', row.names=1)
 mod_pol <- read.csv('data/ModP35c_East.csv', row.names=1, sep='\t')
 
-new.pol <- mod_pol[,7:ncol(mod_pol)] / rowSums(mod_pol[,7:ncol(mod_pol)])
+mod_pol <- mod_pol[mod_pol$LONDD > -100, ]
+climate <- climate[climate$LONDD > -100, ]
+
+bad.pol <- c("LATDD", "LONDD", "XXX", "XXX.1", "ELEVATION", "PolSum", 
+             'SPHAGNUM', 'CYPERACE', 'PTERIDIUM')
+
+new.pol <- mod_pol[, !colnames(mod_pol)%in% bad.pol]
+  
+new.pol <- new.pol / rowSums(new.pol, na.rm=TRUE)
 
 climate <- climate[rownames(mod_pol),]
 
@@ -42,9 +51,3 @@ max.diss <- apply(diag.dist, 2, max, na.rm=TRUE)
 
 min.dist.dens <- density(min.diss, from=0, to=1.5, n=100)
 max.dist.dens <- density(max.diss, from=0, to=1.5, n=100)
-
-load('data/wa.res.RData')
-load('data/mat.res.RData')
-load('data/wapls.res.RData')
-load('data/rfor.res.RData')
-load('data/brt.res.RData')
