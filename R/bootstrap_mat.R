@@ -68,7 +68,7 @@ sfExport(list = list('mat.fun'))
 sfExport(list = list('new.pol'))
 sfExport(list = list('climate'))
 
-for(i in i:length(vals)){
+for(i in 1:length(vals)){
   #  At each quantile, figure out which samples should be acceptable for a calibration set targeting
   #  each sample return 'keep.pol'
 
