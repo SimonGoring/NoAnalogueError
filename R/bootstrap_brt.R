@@ -61,15 +61,19 @@ brt.run <- function(j){
   # Construct brt model. x$calib.clim and x$calib.pol combined into a single
   # data frame and passed as the "data" parameter.
   
-  brt.model <- gbm(brt.formula, distribution="gaussian", 
+  brt.model <- try(gbm(brt.formula, distribution="gaussian", 
                    n.trees=500, shrinkage=0.005, 
                    interaction.depth=6, cv.folds=4, 
                    verbose=FALSE, 
                    data=cbind(x$calib.clim, 
-                              x$calib.pol[,!zeros])[!bad.clim,])
+                              x$calib.pol[,!zeros])[!bad.clim,]))
 
-  # This probably always returns 500
-  brt.ntrees <- gbm.perf(brt.model, method="cv", plot.it=FALSE)   
+  if(!class(brt.model) == 'try-error'){
+    # This probably always returns 500
+    brt.ntrees <- gbm.perf(brt.model, method="cv", plot.it=FALSE)   
+  } else {
+    brt.model <- NA
+  }  
   
   if (length(brt.model) > 1){
     output <- predict(brt.model, new.pol[j,!zeros], brt.ntrees, type="response")
