@@ -70,14 +70,20 @@ brt.run <- function(j){
 
   if(!class(brt.model) == 'try-error'){
     # This probably always returns 500
-    brt.ntrees <- gbm.perf(brt.model, method="cv", plot.it=FALSE)   
+    brt.ntrees <- try(gbm.perf(brt.model, method="cv", plot.it=FALSE))
+    if(class(brt.ntrees) == 'try-error'){
+      brt.model <- NA
+    }
   } else {
     brt.model <- NA
   }  
   
   if (length(brt.model) > 1){
-    output <- predict(brt.model, new.pol[j,!zeros], brt.ntrees, type="response")
+    output <- try(predict(brt.model, new.pol[j,!zeros], brt.ntrees, type="response"))
+    if(class(output) == 'try-error'){
+      output <- NA
     }
+  }
   else{
     output <- NA
   }
