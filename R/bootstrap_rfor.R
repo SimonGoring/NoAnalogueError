@@ -3,7 +3,7 @@ library(snowfall)
 library(randomForest)
 
 sfStop()
-sfInit(parallel = TRUE, cpus = 30)
+sfInit(parallel = TRUE, cpus = 5)
 
 vals <- seq(0, 1, by=0.01)
 
