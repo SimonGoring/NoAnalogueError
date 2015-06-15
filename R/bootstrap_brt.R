@@ -149,12 +149,19 @@ for(k in samp){
   if(is.na(brt.res$mean_prediction[j,i])){
 
     prediction <- unlist(sfLapply(rep(j, 30), fun = function(z)try(brt.run(z))))
-  
-    brt.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
-    brt.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
-    brt.res$bias[j, i] <- (climate[j,10] - mean(prediction, na.rm=TRUE))^2
-    brt.res$expectation[j, i] <- mean((climate[j,10] - prediction)^2)
-    brt.res$variance[j, i] <- mean((mean(prediction) - prediction)^2)
+    if(!is.na(mean(prediction)){
+      brt.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
+      brt.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
+      brt.res$bias[j, i] <- (climate[j,10] - mean(prediction, na.rm=TRUE))^2
+      brt.res$expectation[j, i] <- mean((climate[j,10] - prediction)^2)
+      brt.res$variance[j, i] <- mean((mean(prediction) - prediction)^2)
+    } else {
+      brt.res$mean_prediction[j,i] <- 9999
+      brt.res$sample_size[j,i] <- 9999
+      brt.res$bias[j, i] <- 9999
+      brt.res$expectation[j, i] <- 9999
+      brt.res$variance[j, i] <- 9999
+    }
   }
 
   save(brt.res, file = 'data/brt.res.RData')
