@@ -11,7 +11,7 @@ library(snowfall)
 library(gbm)
 
 sfStop()
-sfInit(parallel = TRUE, cpus = 2)
+sfInit(parallel = TRUE, cpus = 15)
 
 vals <- seq(0, 1, by=0.01)
 
