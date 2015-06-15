@@ -11,7 +11,7 @@ library(snowfall)
 library(gbm)
 
 sfStop()
-sfInit(parallel = TRUE, cpus = 15)
+sfInit(parallel = TRUE, cpus = 2)
 
 vals <- seq(0, 1, by=0.01)
 
@@ -55,8 +55,14 @@ brt.run <- function(j){
   # Construct the brt formula based on x$calib.clim and x$calib.pol column 
   # names, omitting the zero-sum taxa which won't be used.
   
-  brt.formula <- as.formula(paste (colnames(x$calib.clim)[1], "~", 
-                                   paste(colnames(x$calib.pol)[!zeros], collapse=" + ")))
+  if(sum(!zeros) == 0){
+    stop('Whoops.')
+  }
+  
+  new.formula <- sprintf("%s ~ %s", colnames(x$calib.clim)[1], 
+                         paste(colnames(x$calib.pol)[!zeros], collapse=" + ")) 
+  
+  brt.formula <- as.formula(new.formula)
 
   # Construct brt model. x$calib.clim and x$calib.pol combined into a single
   # data frame and passed as the "data" parameter.
@@ -142,7 +148,7 @@ for(k in samp){
     
   if(is.na(brt.res$mean_prediction[j,i])){
 
-    prediction <- unlist(sfLapply(rep(j, 30), fun = brt.run))
+    prediction <- unlist(sfLapply(rep(j, 30), fun = function(z)try(brt.run(z))))
   
     brt.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
     brt.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
