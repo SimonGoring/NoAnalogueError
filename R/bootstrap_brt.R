@@ -149,7 +149,8 @@ for(k in samp){
   if(is.na(brt.res$mean_prediction[j,i])){
 
     prediction <- unlist(sfLapply(rep(j, 30), fun = function(z)try(brt.run(z))))
-    if(!is.na(mean(prediction)){
+    
+    if(!is.na(mean(prediction))){
       brt.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
       brt.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
       brt.res$bias[j, i] <- (climate[j,10] - mean(prediction, na.rm=TRUE))^2
