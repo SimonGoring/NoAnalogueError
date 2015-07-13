@@ -1,5 +1,5 @@
 ---
-output: html_document
+output: pdf_document
 ---
 Non-analogues in paleoecological reconstruction - the effects of analogue distance
 ========================================================
@@ -125,7 +125,7 @@ Variable | Percent Variability
 `r names(best.clim)[6]` | `r best.clim[6]`
 `r names(best.clim)[7]` | `r best.clim[7]`
 
-Key variables based on the $latex \frac {\lambda_1} {\lambda_2} $ using pCCA appear to be climate variables relating to mean monthly percent summer sunshine (variables preceded by an 's').  These variables are likely to be variables that are combinations of temperature and preciptiation variables, however this value is not linear, nor is it continuous, meaning that .  While Telford & Birks (2009) have criticised sunshine reconstructions (Freshette et al., 2008) in the past (and perhaps with good reason), the strength of the sunshine signal in the climate data is worth noting, but the limitations of CCA may impact our ability to detect and accurately assess its importance.
+Key variables based on the $\frac{\lambda_1}{\lambda_2}$ using pCCA appear to be climate variables relating to mean monthly percent summer sunshine (variables preceded by an 's').  These variables are likely to be variables that are combinations of temperature and preciptiation variables, however this value is not linear, nor is it continuous, meaning that .  While Telford & Birks (2009) have criticised sunshine reconstructions (Freshette et al., 2008) in the past (and perhaps with good reason), the strength of the sunshine signal in the climate data is worth noting, but the limitations of CCA may impact our ability to detect and accurately assess its importance.
 
 Model outputs
 =========================
@@ -187,7 +187,7 @@ loss.map <-  ggplot(data = data.frame(map), aes(long, lat)) +
   coord_map(projection='albers', lat0=35, lat1=55, xlim=c(-100, -60), ylim=c(35, 80)) +
   scale_color_brewer(palette = 'PiYG', type = 'div')
   #scale_color_continuous(low = '#F08080', high='#4169E1')
-  
+
 grid.arrange(loss, loss.map, ncol=2)
 
 ```
@@ -195,6 +195,39 @@ grid.arrange(loss, loss.map, ncol=2)
 **Figure 4**. *As the analogue distance exclusion is increased the available data set size is reduced, although some points continue to maintain a large number of potential analogues, this is directly related to the minimum distance to the closest analogue.  Points that maintain a large pool of analogues are far from neighbours.*
 
 We have an interesting distribution of loss here.  First, the color coding is based on loss to 'non-analogue' conditions, and we see that it is possible for some samples to have relatively low loss to the no-analogue point, but then much higher losses to the extreme end of our analogue space (see the magenta lines at the very bottom end of Figure 4a.).  Secondly, the points that lose the most samples tend to be in the boreal forest.  To some degree this is surprising, however, the dominance of Pinus and Picea in these forests likely means that they have smaller analogue distances from one another than samples in the southern forests (with more diversity and therfore, likely fewer close analogues), but also, surpisingly, arctic samples also have higer inter-sample distances, and are thus less sensitive to losses of close analogues.
+```{r}
+
+get_analoguegradient <- function(dist){
+
+  x <- findInterval(dist, vals)
+  
+  climate_stuff <- data.frame(tjul = c(climate$tjul, 
+                                     brt.res$mean_prediction[,x],
+                                     mat.res$mean_prediction[,x],
+                                     rfor.res$mean_prediction[,x],
+                                     wa.res$mean_prediction[,x],
+                                     wapls.res$mean_prediction[,x]),
+                            class = factor(c(rep('Actual', nrow(climate)),
+                                             rep(c('BRT', 'MAT', 'rFor', 'WA', 'WAPLS'),
+                                                 each = nrow(mat.res$mean_prediction)))),
+                            dist = dist)
+
+}
+
+dist_dists <- na.omit(do.call(rbind.data.frame,lapply(c(0, .5, 1), get_analoguegradient)))
+
+density_plot <- ggplot(dist_dists, aes(x = tjul, color = class, size = class, fill = class)) + 
+  geom_density() +
+  scale_size_manual(values = c(2, 1, 1, 1, 1, 1)) +
+  scale_fill_manual(values = c('#d3d3d3', NA, NA, NA, NA, NA)) +
+  theme_bw() +
+  coord_cartesian(xlim=c(-4.2, 28.8)) +
+  facet_wrap(~dist, ncol=1, scales='free_y')
+
+density_plot
+
+```
+**Figure 5**. *Climate predictions for July temperature using the full data set at an analogue distance of 0, 0.5 and 1.  These results indicate that most predictive methods capture the full environmental gradient, however WA and WAPLS appear to over-emphasise the middle of the environmental gradient, BRT appears to truncate the gradient at both high and low ends.  As expected, MAT appears to capture the true gradient best when the full data set is used, but rapidly regresses to the mean as distance to the nearest neighbor increases.*
 
 ```{r Fig5PredictedValues, message=FALSE, echo=FALSE, warning=FALSE}
 
@@ -312,6 +345,14 @@ ggplot(model.samp, aes(x = dissim, y = sqrt(variance), group = site, color = ini
 Discussion
 =========================
 What does this tell us about predicting climate in non-analogue space?
+
+Key points:  
+Most predictive methods are stable until the no-analogue threshold is met.  Beyond this threshold the collapse of most methods is (surprisingly) rapid, in part due to the fact that the number of samples available for the calibration function drops substantially, indicating high sensitivity to the sample neighborhood for each of these methods.
+
+* WAPLS can't be trusted given its bizarre behaviour beyond analogue space.
+
+* MAT is incredibly dependent on finding close neighbors.  As analogue distance increases to near neighbours the likelihood of having poor fit increases substantially.  This is manifested in the apparent 'flip' in predictions.  We don't get regression to the mean, we get regression to the nearest available sample.
+* BRT seems most robust, but for the purposes of this simulation (in lage part) it is mind-bogglingly slow, even when compared to rForest, howver (1) for a single run this is unlikely to be an issue (single runs can take somewhere between 1 and 10 minutes) and (2) interstingly BRT predictions are the most constrained, i.e., the predictive output has a much narrower range of predictions than the underlying data set.
 
 References
 =========================
