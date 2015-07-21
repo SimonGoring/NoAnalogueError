@@ -1,5 +1,5 @@
 ---
-output: word_document
+output: pdf_document
 ---
 Non-analogues in paleoecological reconstruction - the effects of analogue distance
 ========================================================
@@ -44,6 +44,7 @@ ggplot(data = data.frame(map), aes(long, lat)) +
   coord_map(projection='albers', lat0=35, lat1=55, xlim=c(-100, -60), ylim=c(35, 80))
 
 ```
+
 **Figure 1**. *Location of sample plots used for analysis.  Samples are derived from a modern pollen dataset.*
 
 To analyse the effects of non-analogue pollen on model skill we chose five pollen-based reconstruction methods from the literature and apply them to the modern pollen data from eastern North America.  The models are MAT, WA, WAPLS, BRT and randomForest.  Each of these models has been used previously in the pollen literature, and has strengths and weaknesses.  MAT (Overpeck, 1985) is commonly applied to reconstruct climate, for pollen, diatoms, chironomids and other taxa.  WA has a long history in the literature, and the recent development of monotone deshrinking has apparently improved performance further (Simpson, 2014?), but WA continues to suffer from a basic assumption of unimodal taxon distributions along climate gradients.  
@@ -53,8 +54,7 @@ Results
 
 When we examine the dissimilarity scores we can see that the distribution between minimum, maximum and overall dissimilarities can be understood numerically and spatially.  
 
-Mean minimum dissimilarity for pollen samples in the modern pollen dataset ranges from `r min(min.diss)` to `r min(min.diss)`, with a 95% confidence interval from `r quantile(min.diss, 0.025)` to `r quantile(min.diss, 0.975)`.  The highest minimum analogue distance is for an unpublished site along the New York, Pennsylvannia border.  The site is notable for very high proportions of *Fraxinus pennsylvanica/americana* pollen, more than 5x higher than the next closest site.  The lowest minimum distance occurs across four sites, two from Thinn Lake, identified as potentially anomalous in Williams et al (2009), 
-
+Mean minimum dissimilarity for pollen samples in the modern pollen dataset ranges from `r min(min.diss)` to `r min(min.diss)`, with a 95% confidence interval from `r quantile(min.diss, 0.025)` to `r quantile(min.diss, 0.975)`.  The highest minimum analogue distance is for an unpublished site along the New York, Pennsylvannia border.  The site is notable for very high proportions of *Fraxinus pennsylvanica/americana* pollen, more than 5x higher than the next closest site.  The lowest minimum distance occurs across four sites, two from Thinn Lake, identified as potentially anomalous in Williams et al (2009) and XXXX.  The geographic distribution of non-analogue sites is particularly interesting since many of the sites are in close proximity to other modern sites.  This indicates that While spatial autocorreltaion is likely to play a role in the proximity of analogues (and thus their predictions) [@telfordSpatialAuto] it is not always the case that spatially proximate samples are compositionally proximate.
 
 ```{r Fig2MinDissim, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations', echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -78,37 +78,17 @@ ggplot(dissim.scores) +
   scale_x_continuous(expand=c(0,0))
 
 ```
+
 **Figure 2**.  *Distribution of squared-chord dissimilarity values.  The 95% confidence interval for the minumum spanning distance in the North American Modern Pollen Database is 0.10 - 0.48.  We choose 0.48 (marked on the x axis) as our cut-off for 'non-analogue' distances in the database.*
 
 ```{r Fig3SiteMDS, fig.width=7, fig.height=6, fig.cap='Figure: North American site MDS scores', echo=FALSE, message=FALSE, warning=FALSE}
 
-mds <- data.frame(pol.mds$points,
-                  non.ana = factor(min.diss > 0.48))
-
-non.ana <- ggplot(data = mds, aes(x = X1, y = X2)) +
-  geom_point(data = mds[mds$non.ana == FALSE,], alpha=0.5, size = 2, color='black') +   
-  geom_point(data = mds[mds$non.ana == TRUE,], alpha=0.7, size = 4, color='red') +
-  theme_bw() +
-  xlab('MDS Axis One') + ylab('MDS Axis Two') +
-  theme(text = element_text(size=24, family='serif'))
-
-non.ana.map <- ggplot(data = data.frame(map), aes(long, lat)) + 
-  geom_polygon(aes(group=group), color='blue', alpha=0.2) +
-  geom_point(data = data.frame(climate)[mds$non.ana == FALSE,], 
-             aes(x = LONDD, y = LATDD), alpha=0.5) +
-  geom_point(data = data.frame(climate)[mds$non.ana == TRUE,], 
-             aes(x = LONDD, y = LATDD), color = 'red', size = 3) +
-   theme_bw() +
-  xlab('Longitude') + ylab('Latitude') +
-  theme(axis.text=element_text(size=12, family='serif'),
-        panel.background = element_rect(fill = 'lightblue')) +
-  coord_map(projection='albers', lat0=35, lat1=55, xlim=c(-100, -60), ylim=c(35, 80))
-
-grid.arrange(non.ana, non.ana.map, ncol=2)
+source('R/figures/figure3.R')
+run_figure3(pol.mds, min.diss, map, climate)
 
 ```
-**Figure 3**. *Location of non-analogue points in the modern pollen data, presented within a non-metric multidimensional scaling ordination (Panel 1) and geographically.  Interestingly, although a number of geographically isolated points exist in the dataset, the majority of non-analogue points exist within the most dense region of sampling, indicating that non-analogue sites are not ecologically stratified.*
 
+**Figure 3**. *Location of non-analogue points in the modern pollen data, presented within a non-metric multidimensional scaling ordination (Panel 1) and geographically.  Interestingly, although a number of geographically isolated points exist in the dataset, the majority of non-analogue points exist within the most dense region of sampling, indicating that non-analogue sites are not ecologically stratified.*
 
 
 Climate Variables
@@ -145,7 +125,7 @@ Variable | Percent Variability
 `r names(best.clim)[6]` | `r best.clim[6]`
 `r names(best.clim)[7]` | `r best.clim[7]`
 
-Key variables based on the $latex \frac {\lambda_1} {\lambda_2} $ using pCCA appear to be climate variables relating to mean monthly percent summer sunshine (variables preceded by an 's').  These variables are likely to be variables that are combinations of temperature and preciptiation variables, however this value is not linear, nor is it continuous, meaning that .  While Telford & Birks (2009) have criticised sunshine reconstructions (Freshette et al., 2008) in the past (and perhaps with good reason), the strength of the sunshine signal in the climate data is worth noting, but the limitations of CCA may impact our ability to detect and accurately assess its importance.
+Key variables based on the $\frac{\lambda_1}{\lambda_2}$ using pCCA appear to be climate variables relating to mean monthly percent summer sunshine (variables preceded by an 's').  These variables are likely to be variables that are combinations of temperature and preciptiation variables, however this value is not linear, nor is it continuous, meaning that .  While Telford & Birks (2009) have criticised sunshine reconstructions (Freshette et al., 2008) in the past (and perhaps with good reason), the strength of the sunshine signal in the climate data is worth noting, but the limitations of CCA may impact our ability to detect and accurately assess its importance.
 
 Model outputs
 =========================
@@ -207,13 +187,47 @@ loss.map <-  ggplot(data = data.frame(map), aes(long, lat)) +
   coord_map(projection='albers', lat0=35, lat1=55, xlim=c(-100, -60), ylim=c(35, 80)) +
   scale_color_brewer(palette = 'PiYG', type = 'div')
   #scale_color_continuous(low = '#F08080', high='#4169E1')
-  
+
 grid.arrange(loss, loss.map, ncol=2)
 
 ```
+
 **Figure 4**. *As the analogue distance exclusion is increased the available data set size is reduced, although some points continue to maintain a large number of potential analogues, this is directly related to the minimum distance to the closest analogue.  Points that maintain a large pool of analogues are far from neighbours.*
 
 We have an interesting distribution of loss here.  First, the color coding is based on loss to 'non-analogue' conditions, and we see that it is possible for some samples to have relatively low loss to the no-analogue point, but then much higher losses to the extreme end of our analogue space (see the magenta lines at the very bottom end of Figure 4a.).  Secondly, the points that lose the most samples tend to be in the boreal forest.  To some degree this is surprising, however, the dominance of Pinus and Picea in these forests likely means that they have smaller analogue distances from one another than samples in the southern forests (with more diversity and therfore, likely fewer close analogues), but also, surpisingly, arctic samples also have higer inter-sample distances, and are thus less sensitive to losses of close analogues.
+```{r}
+
+get_analoguegradient <- function(dist){
+
+  x <- findInterval(dist, vals)
+  
+  climate_stuff <- data.frame(tjul = c(climate$tjul, 
+                                     brt.res$mean_prediction[,x],
+                                     mat.res$mean_prediction[,x],
+                                     rfor.res$mean_prediction[,x],
+                                     wa.res$mean_prediction[,x],
+                                     wapls.res$mean_prediction[,x]),
+                            class = factor(c(rep('Actual', nrow(climate)),
+                                             rep(c('BRT', 'MAT', 'rFor', 'WA', 'WAPLS'),
+                                                 each = nrow(mat.res$mean_prediction)))),
+                            dist = dist)
+
+}
+
+dist_dists <- na.omit(do.call(rbind.data.frame,lapply(c(0, .5, 1), get_analoguegradient)))
+
+density_plot <- ggplot(dist_dists, aes(x = tjul, color = class, size = class, fill = class)) + 
+  geom_density() +
+  scale_size_manual(values = c(2, 1, 1, 1, 1, 1)) +
+  scale_fill_manual(values = c('#d3d3d3', NA, NA, NA, NA, NA)) +
+  theme_bw() +
+  coord_cartesian(xlim=c(-4.2, 28.8)) +
+  facet_wrap(~dist, ncol=1, scales='free_y')
+
+density_plot
+
+```
+**Figure 5**. *Climate predictions for July temperature using the full data set at an analogue distance of 0, 0.5 and 1.  These results indicate that most predictive methods capture the full environmental gradient, however WA and WAPLS appear to over-emphasise the middle of the environmental gradient, BRT appears to truncate the gradient at both high and low ends.  As expected, MAT appears to capture the true gradient best when the full data set is used, but rapidly regresses to the mean as distance to the nearest neighbor increases.*
 
 ```{r Fig5PredictedValues, message=FALSE, echo=FALSE, warning=FALSE}
 
@@ -271,7 +285,7 @@ ggplot(model.samp, aes(x = dissim, y = preds, group = site, color = init)) +
   facet_wrap(~model, nrow = 1) +
   scale_x_continuous(expand=c(0,0), breaks = c(0.5, 1)) +
   scale_y_continuous(expand=c(0,0), limits=c(0, 40)) +
-  scale_color_continuous(low = 'blue', high='pink', trans='sqrt') +
+  #scale_color_continuous(low = 'blue', high='pink', trans='sqrt') +
   theme(legend.position = 'none',
         axis.title = element_text(family = 'serif', face = 'bold', size = 14),
         strip.text = element_text(family = 'serif', face = 'bold', size = 14),
@@ -283,6 +297,7 @@ ggplot(model.samp, aes(x = dissim, y = preds, group = site, color = init)) +
   ylab('Predicted Value')
 
 ```
+
 **Figure 5**. *Change in site predictions over time.  Of great interest is the difference between model outputs as the exclusion zone increases.  MAT can never predict beyond the extent of the data samples in the pool, and so as the exclusion zone increases the predictions move toward the dataset mean.  WAPLS uses an initial transformation and then regresses against it to predict new values, so as the exclusion zone increases we see an increase in the spread of the predicted values, with much greater variability and a loss of accuracy.*
 
 ```{r Fig6BiasValues, message=FALSE, echo=FALSE, warning=FALSE}
@@ -303,6 +318,7 @@ ggplot(model.samp, aes(x = dissim, y = sqrt(bias), group = site, color = init)) 
   ylab('Sample Bias (RMSEP)')
 
 ```
+
 **Figure 6**. *Change in model bias with increasing analogue distance.*
 
 ```{r Fig7VarianceValues, message=FALSE, echo=FALSE, warning=FALSE}
@@ -323,11 +339,20 @@ ggplot(model.samp, aes(x = dissim, y = sqrt(variance), group = site, color = ini
   ylab('Bootstrap Variance')
 
 ```
+
 **Figure 7**. *Change in bootstrap variance with increasing analogue distance.*
 
 Discussion
 =========================
 What does this tell us about predicting climate in non-analogue space?
+
+Key points:  
+Most predictive methods are stable until the no-analogue threshold is met.  Beyond this threshold the collapse of most methods is (surprisingly) rapid, in part due to the fact that the number of samples available for the calibration function drops substantially, indicating high sensitivity to the sample neighborhood for each of these methods.
+
+* WAPLS can't be trusted given its bizarre behaviour beyond analogue space.
+
+* MAT is incredibly dependent on finding close neighbors.  As analogue distance increases to near neighbours the likelihood of having poor fit increases substantially.  This is manifested in the apparent 'flip' in predictions.  We don't get regression to the mean, we get regression to the nearest available sample.
+* BRT seems most robust, but for the purposes of this simulation (in lage part) it is mind-bogglingly slow, even when compared to rForest, howver (1) for a single run this is unlikely to be an issue (single runs can take somewhere between 1 and 10 minutes) and (2) interstingly BRT predictions are the most constrained, i.e., the predictive output has a much narrower range of predictions than the underlying data set.
 
 References
 =========================
