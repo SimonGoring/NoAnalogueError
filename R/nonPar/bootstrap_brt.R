@@ -110,7 +110,7 @@ for(k in samp){
     
   if(is.na(brt.res$mean_prediction[j,i])){
 
-    prediction <- unlist(lapply(rep(j, 50), FUN = brt.run))
+    prediction <- unlist(lapply(rep(j, 30), FUN = brt.run))
   
     brt.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
     brt.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)

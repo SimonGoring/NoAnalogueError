@@ -2,21 +2,21 @@ library(snowfall)
 library(analogue)
 
 sfStop()
-sfInit(parallel = TRUE, cpus = 4)
+sfInit(parallel = TRUE, cpus = 30)
 
 # Set up the analogue distance exclusion values.
 #  This was originally a set of quantiles, but it played havoc on plotting and
 #  didn't seem to add much to the understanding of what was going on.
 vals <- seq(0, 1, by=0.01)
 
-wa.res <- list(mean_prediction  = matrix(ncol=length(vals), nrow=nrow(new.pol)),
-               sample_size      = matrix(ncol=length(vals), nrow=nrow(new.pol)),
-               bias             = matrix(ncol=length(vals), nrow=nrow(new.pol)),
-               variance         = matrix(ncol=length(vals), nrow=nrow(new.pol)),
-               expectation      = matrix(ncol=length(vals), nrow=nrow(new.pol)))
-
-if('wa.res.RData' %in% list.files('data/')) {
+if('wa.res.RData' %in% list.files('data')){
   load('data/wa.res.RData')
+} else {
+  wa.res <- list(mean_prediction  = matrix(ncol=length(vals), nrow=nrow(new.pol)),
+                 sample_size      = matrix(ncol=length(vals), nrow=nrow(new.pol)),
+                 bias             = matrix(ncol=length(vals), nrow=nrow(new.pol)),
+                 variance         = matrix(ncol=length(vals), nrow=nrow(new.pol)),
+                 expectation      = matrix(ncol=length(vals), nrow=nrow(new.pol)))
 }
 
 i <- 1; j <- 1

@@ -11,7 +11,7 @@ library(snowfall)
 library(gbm)
 
 sfStop()
-sfInit(parallel = TRUE, cpus = 6)
+sfInit(parallel = TRUE, cpus = 15)
 
 vals <- seq(0, 1, by=0.01)
 
@@ -55,25 +55,41 @@ brt.run <- function(j){
   # Construct the brt formula based on x$calib.clim and x$calib.pol column 
   # names, omitting the zero-sum taxa which won't be used.
   
-  brt.formula <- as.formula(paste (colnames(x$calib.clim)[1], "~", 
-                                   paste(colnames(x$calib.pol)[!zeros], collapse=" + ")))
+  if(sum(!zeros) == 0){
+    stop('Whoops.')
+  }
+  
+  new.formula <- sprintf("%s ~ %s", colnames(x$calib.clim)[1], 
+                         paste(colnames(x$calib.pol)[!zeros], collapse=" + ")) 
+  
+  brt.formula <- as.formula(new.formula)
 
   # Construct brt model. x$calib.clim and x$calib.pol combined into a single
   # data frame and passed as the "data" parameter.
   
-  brt.model <- gbm(brt.formula, distribution="gaussian", 
+  brt.model <- try(gbm(brt.formula, distribution="gaussian", 
                    n.trees=500, shrinkage=0.005, 
                    interaction.depth=6, cv.folds=4, 
                    verbose=FALSE, 
                    data=cbind(x$calib.clim, 
-                              x$calib.pol[,!zeros])[!bad.clim,])
+                              x$calib.pol[,!zeros])[!bad.clim,]))
 
-  # This probably always returns 500
-  brt.ntrees <- gbm.perf(brt.model, method="cv", plot.it=FALSE)   
+  if(!class(brt.model) == 'try-error'){
+    # This probably always returns 500
+    brt.ntrees <- try(gbm.perf(brt.model, method="cv", plot.it=FALSE))
+    if(class(brt.ntrees) == 'try-error'){
+      brt.model <- NA
+    }
+  } else {
+    brt.model <- NA
+  }  
   
   if (length(brt.model) > 1){
-    output <- predict(brt.model, new.pol[j,!zeros], brt.ntrees, type="response")
+    output <- try(predict(brt.model, new.pol[j,!zeros], brt.ntrees, type="response"))
+    if(class(output) == 'try-error'){
+      output <- NA
     }
+  }
   else{
     output <- NA
   }
@@ -132,13 +148,21 @@ for(k in samp){
     
   if(is.na(brt.res$mean_prediction[j,i])){
 
-    prediction <- unlist(sfLapply(rep(j, 30), fun = brt.run))
-  
-    brt.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
-    brt.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
-    brt.res$bias[j, i] <- (climate[j,10] - mean(prediction, na.rm=TRUE))^2
-    brt.res$expectation[j, i] <- mean((climate[j,10] - prediction)^2)
-    brt.res$variance[j, i] <- mean((mean(prediction) - prediction)^2)
+    prediction <- unlist(sfLapply(rep(j, 30), fun = function(z)try(brt.run(z))))
+    
+    if(!is.na(mean(prediction))){
+      brt.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
+      brt.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
+      brt.res$bias[j, i] <- (climate[j,10] - mean(prediction, na.rm=TRUE))^2
+      brt.res$expectation[j, i] <- mean((climate[j,10] - prediction)^2)
+      brt.res$variance[j, i] <- mean((mean(prediction) - prediction)^2)
+    } else {
+      brt.res$mean_prediction[j,i] <- 9999
+      brt.res$sample_size[j,i] <- 9999
+      brt.res$bias[j, i] <- 9999
+      brt.res$expectation[j, i] <- 9999
+      brt.res$variance[j, i] <- 9999
+    }
   }
 
   save(brt.res, file = 'data/brt.res.RData')

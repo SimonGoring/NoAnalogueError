@@ -1,19 +1,24 @@
 library(snowfall)
 
 sfStop()
-sfInit(parallel = TRUE, cpus = 6)
+sfInit(parallel = TRUE, cpus = 30)
 
 # Set up the analogue distance exclusion values.
 #  This was originally a set of quantiles, but it played havoc on plotting and
 #  didn't seem to add much to the understanding of what was going on.
 vals <- seq(0, 1, by=0.01)
 
-mat.res <- list(mean_prediction  = matrix(ncol=length(vals), nrow=nrow(new.pol)),
-                sample_size      = matrix(ncol=length(vals), nrow=nrow(new.pol)),
-                bias             = matrix(ncol=length(vals), nrow=nrow(new.pol)),
-                variance         = matrix(ncol=length(vals), nrow=nrow(new.pol)),
-                expectation      = matrix(ncol=length(vals), nrow=nrow(new.pol)))
+if('mat.res.RData' %in% list.files('data')){
+  load('data/mat.res.RData')
+} else {
+  
+  mat.res <- list(mean_prediction  = matrix(ncol=length(vals), nrow=nrow(new.pol)),
+                  sample_size      = matrix(ncol=length(vals), nrow=nrow(new.pol)),
+                  bias             = matrix(ncol=length(vals), nrow=nrow(new.pol)),
+                  variance         = matrix(ncol=length(vals), nrow=nrow(new.pol)),
+                  expectation      = matrix(ncol=length(vals), nrow=nrow(new.pol)))
 
+}  
 #  Turn the distance table into a matrix.
 diag.dist <- as.matrix(dists); diag(diag.dist) <- NA
 
@@ -63,36 +68,36 @@ sfExport(list = list('mat.fun'))
 sfExport(list = list('new.pol'))
 sfExport(list = list('climate'))
 
-for(i in i:length(vals)){
+for(i in 1:length(vals)){
   #  At each quantile, figure out which samples should be acceptable for a calibration set targeting
   #  each sample return 'keep.pol'
-  keep.pol <- aaply(diag.dist, 1, 
-                    function(x) {x > vals[i]})
 
-  diag(keep.pol) <- FALSE
-  
   if(any(is.na(mat.res$mean_prediction[,i]))){
+    keep.pol <- aaply(diag.dist, 1, 
+                      function(x) {x > vals[i]})
+    
+    diag(keep.pol) <- FALSE
+    
     fast.mat <- laply(1:nrow(diag.dist), fmat)
     rmse <- aaply(fast.mat, 2, function(x) sqrt(mean((x - climate[,10])^2, na.rm = T)))
-  }
   
-  sfExport(list = list('keep.pol'))
-
-  for(j in 1:nrow(new.pol)){
-
-    prediction <- unlist(sfLapply(1:30, mat.fun, j = j, min = which.min(rmse)))
-    
-    if(is.na(mat.res$mean_prediction[j,i])){
-      mat.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
-      mat.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
-      mat.res$bias[j, i] <- (climate[j,10] - mean(prediction, na.rm=TRUE))^2
-      mat.res$expectation[j, i]  <- mean((climate[j,10] - prediction)^2, na.rm=TRUE)
-      mat.res$variance[j, i]  <- mean((mean(prediction, na.rm=TRUE) - prediction)^2, na.rm=TRUE)
+    sfExport(list = list('keep.pol'))
+  
+    for(j in 1:nrow(new.pol)){
+  
+      if(is.na(mat.res$mean_prediction[j,i])){
+        prediction <- unlist(sfLapply(1:30, mat.fun, j = j, min = which.min(rmse)))
+        mat.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
+        mat.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
+        mat.res$bias[j, i] <- (climate[j,10] - mean(prediction, na.rm=TRUE))^2
+        mat.res$expectation[j, i]  <- mean((climate[j,10] - prediction)^2, na.rm=TRUE)
+        mat.res$variance[j, i]  <- mean((mean(prediction, na.rm=TRUE) - prediction)^2, na.rm=TRUE)
+      }
+  
+      
     }
-
-    
+      
+    save(mat.res, file = 'data/mat.res.RData')
   }
-    
-  save(mat.res, file = 'data/mat.res.RData')
   cat(i, '\n')
 }

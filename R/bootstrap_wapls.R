@@ -1,7 +1,7 @@
 library(snowfall)
 
 sfStop()
-sfInit(parallel = TRUE, cpus = 6)
+sfInit(parallel = TRUE, cpus = 30)
 
 # Set up the analogue distance exclusion values.
 #  This was originally a set of quantiles, but it played havoc on plotting and
@@ -76,7 +76,7 @@ for(i in 1:length(vals)){
     
     if(is.na(wapls.res$mean_prediction[j,i])){
       #  Run WAPLS
-      prediction <- unlist(sfLapply(rep(j, 100), fun = wapls.run))
+      prediction <- unlist(sfLapply(rep(j, 30), fun = wapls.run))
     
       wapls.res$mean_prediction[j,i] <- mean(prediction, na.rm=TRUE)
       wapls.res$sample_size[j,i] <- sum(keep.pol[j,], na.rm=TRUE)
