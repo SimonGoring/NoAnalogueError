@@ -3,8 +3,6 @@ title: "Non-analogues in paleoecological reconstruction - the effects of analogu
 author: "Simon Goring *et al*."
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  md_document:
-    variant: markdown
   pdf_document:
     pandoc_args: "-V geometry:vmargin=1in -V geometry:hmargin=1in"
 bibliography: non-analogue_clim.bib
