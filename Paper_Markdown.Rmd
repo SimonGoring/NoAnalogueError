@@ -1,8 +1,59 @@
 ---
-output: pdf_document
+title: "Non-analogues in paleoecological reconstruction - the effects of analogue distance"
+author: "Simon Goring *et al*."
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  md_document:
+    variant: markdown
+  pdf_document:
+    pandoc_args: "-V geometry:vmargin=1in -V geometry:hmargin=1in"
+bibliography: non-analogue_clim.bib
+csl: elsevier-harvard.csl
 ---
 Non-analogues in paleoecological reconstruction - the effects of analogue distance
 ========================================================
+
+<!--
+
+```{r setup-knitr, echo = FALSE, message = FALSE}
+# Simon: Note that these are global options that apply to all chunks below.
+
+knitr::opts_chunk$set(
+  comment = " ",
+  error = FALSE,
+  # Note: I have set EVAL to false just to make the bib work. 
+  # Once the bib is fixed, you'll set this to TRUE or just delete this line.
+  eval = TRUE,
+  cache = TRUE,
+  tidy = FALSE,
+  fig.path = "figure/",
+  cache.path = "cache/"
+)
+
+
+
+library("pander")
+library("plyr")
+panderOptions('table.style', 'rmarkdown')
+panderOptions('table.split.table', 300)
+```
+-->
+
+Simon Goring^1^
+
+J Sakari Salonen^2^
+
+Miska Luoto^2,3^
+
+Jack Williams^1,4^
+
+^1^ Department of Geography, University of Wisconsin-Madison, Madison, WI, USA
+
+^2^ ?????????
+
+^3^
+
+^4^ Center for Climatic Research, University of Wisconsin-Madison, Madison, WI, USA
 
 **Abstract**
 *Fossil pollen provides a widespread proxy for past vegetation.  It is increasingly used in paleoclimatic reconstruction, but the limits of its utility are not well known.  Methodological advances, such as the development of tests for spatial autocorrelation, and newer methods for climate reconstruction using boosted regression trees may improve the abilities of these climate reconstruction techniques, but little is known about the accuracy of these models under conditions of non-analogue vegetation known to occur at the end of the late glacial.  In this paper we generate non-analogue pollen assemblages by excluding close neighbours from calibration datasets at increasingly larger squared chord distances.  Using three standard and two newer techniques we then test the ability of pollen-based climate models to accurately recostruct climate under conditions of no-analogue vegetation.*
@@ -16,16 +67,16 @@ source('R/data_setup.R')
 
 Introduction
 =========================
-Pollen assemblages are widely used for paleoclimatic reconstruction during the Holocene, but this method is also applied to pollen assemblages from the last Glacial period (bartlein2011pollen, kaufman2012multi), and earlier (tarasov2011progress, brewer2008climate, cheddadi1998climate).  A particular challenge for climate reconstruction using these much earlier samples is the presence of non-analogue vegetation.  Non-analogue pollen assemblages pose a problem for many reconstruction techniques, these vegetation assemblages may be the result of sets of climate variables that no longer co-exist, ecological conditions resulting from differing rates of species migration () or release from herbivores (gill2009pleistocene), or as a result of changes in human land use (Goring et al. in review?).  
+Pollen assemblages are widely used for paleoclimatic reconstruction during the Holocene, but this method is also applied to pollen assemblages from the last Glacial period [@bartlein2011pollen, @kaufman2012multi], and earlier [@tarasov2011progress; @brewer2008climate, @cheddadi1998climate].  A particular challenge for climate reconstruction using these much earlier samples is the presence of non-analogue vegetation.  Non-analogue pollen assemblages pose a problem for many reconstruction techniques, these vegetation assemblages may be the result of sets of climate variables that no longer co-exist, ecological conditions resulting from differing rates of species migration (REF) or release from herbivores [@gill2009pleistocene], or as a result of changes in human land use [@goring2015preset].  
 
 Predicting climate from pollen in non-analogue space is likely to increase the uncertainty of models, possibly introduce systematic bias in predictions, and is likely to increase the variability of predictions across a time-series of predictions from a single site. However, high-quality terrestrial proxies for climate are important for understanding past climate change, and can act as a constraint on models of climate change in the past derived from GCMs in regions where little proxy data is available.  Thus, understanding the behaviour of pollen-based climate reconstructions in non-analogue space is an important first stem in understanding these reconstructions.
 
-Although we cannot know the values for temperature or precipitation during this time, statistical non-analogues do exist in a modern context, and we can construct false non-analogues using a modified h-block sampling procedure (e.g., Telford & Birks) that examines analogue distance rather than geographical distance.
+Although we cannot know the values for temperature or precipitation during this time, statistical non-analogues do exist in a modern context, and we can construct false non-analogues using a modified h-block sampling procedure [*sensu*, @telford2009evaluation] that examines analogue distance rather than geographical distance.
 
 Methods:
 =========================
 
-Sites from across North America were used to build a modern analogue dataset.  Samples were obtained from the North American Modern Pollen Database east of 100oW.  Pollen taxa were standardized as in Gill et al. (in prep), using a set of 54 taxa, similar to those reported in Whitmore et al. (2005).  We chose to exclude Western North America since pollen taxa such as *Tsuga canadensis* and *Tsuga heterophylla* may be morphologically indistinct, but their parent plant taxa have clearly differentiated distributions, thus it may be possible to find false close-analogues using the entire North American dataset.  While this is not, strictly speaking, a major problem for this analysis, it will raise baseline error rates for models which then cause us to underestimate the change in error as analogue distance is increased.
+Sites from across North America were used to build a modern analogue dataset.  Samples were obtained from the North American Modern Pollen Database east of 100^o^W.  Pollen taxa were standardized as in Gill et al. [@gill2015noanalogues], using a set of 54 taxa, similar to those reported in Whitmore et al. [-@whitmore2005modern].  We chose to exclude Western North America since pollen taxa such as *Tsuga canadensis* and *Tsuga heterophylla* may be morphologically indistinct, but their parent plant taxa have clearly differentiated distributions, thus it may be possible to find false close-analogues using the entire North American dataset.  While this is not, strictly speaking, a major problem for this analysis, it will raise baseline error rates for models which then cause us to underestimate the change in error as analogue distance is increased.
 
 ```{r Fig1SiteLocations, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations', echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -47,14 +98,18 @@ ggplot(data = data.frame(map), aes(long, lat)) +
 
 **Figure 1**. *Location of sample plots used for analysis.  Samples are derived from a modern pollen dataset.*
 
-To analyse the effects of non-analogue pollen on model skill we chose five pollen-based reconstruction methods from the literature and apply them to the modern pollen data from eastern North America.  The models are MAT, WA, WAPLS, BRT and randomForest.  Each of these models has been used previously in the pollen literature, and has strengths and weaknesses.  MAT (Overpeck, 1985) is commonly applied to reconstruct climate, for pollen, diatoms, chironomids and other taxa.  WA has a long history in the literature, and the recent development of monotone deshrinking has apparently improved performance further (Simpson, 2014?), but WA continues to suffer from a basic assumption of unimodal taxon distributions along climate gradients.  
+To analyse the effects of non-analogue pollen on model skill we chose five pollen-based reconstruction methods from the literature and apply them to the modern pollen data from eastern North America.  The models are MAT, WA, WAPLS, BRT and randomForest.  Each of these models has been used previously in the pollen literature, and has strengths and weaknesses.  MAT [@overpeck1985quantitative] is commonly applied to reconstruct climate, for pollen, diatoms, chironomids and other taxa.  WA has a long history in the literature, and the recent development of monotone deshrinking has apparently improved performance further (Simpson, 2014?), but WA continues to suffer from a basic assumption of unimodal taxon distributions along climate gradients.
+
+WAPLS does this and that. . . 
+
+SAKARI or MISKA can you add text here about BRT?
 
 Results
 =========================
 
 When we examine the dissimilarity scores we can see that the distribution between minimum, maximum and overall dissimilarities can be understood numerically and spatially.  
 
-Mean minimum dissimilarity for pollen samples in the modern pollen dataset ranges from `r min(min.diss)` to `r min(min.diss)`, with a 95% confidence interval from `r quantile(min.diss, 0.025)` to `r quantile(min.diss, 0.975)`.  The highest minimum analogue distance is for an unpublished site along the New York, Pennsylvannia border.  The site is notable for very high proportions of *Fraxinus pennsylvanica/americana* pollen, more than 5x higher than the next closest site.  The lowest minimum distance occurs across four sites, two from Thinn Lake, identified as potentially anomalous in Williams et al (2009) and XXXX.  The geographic distribution of non-analogue sites is particularly interesting since many of the sites are in close proximity to other modern sites.  This indicates that While spatial autocorreltaion is likely to play a role in the proximity of analogues (and thus their predictions) [@telfordSpatialAuto] it is not always the case that spatially proximate samples are compositionally proximate.
+Mean minimum dissimilarity for pollen samples in the modern pollen dataset ranges from `r min(min.diss)` to `r min(min.diss)`, with a 95% confidence interval from `r quantile(min.diss, 0.025)` to `r quantile(min.diss, 0.975)`.  The highest minimum analogue distance is for an unpublished site along the New York, Pennsylvannia border.  The site is notable for very high proportions of *Fraxinus pennsylvanica/americana* pollen, more than 5x higher than the next closest site.  The lowest minimum distance occurs across four sites, two from Thinn Lake, identified as potentially anomalous in Williams et al [-@williams2009rapid] and XXXX.  The geographic distribution of non-analogue sites is particularly interesting since many of the sites are in close proximity to other modern sites.  This indicates that While spatial autocorreltaion is likely to play a role in the proximity of analogues (and thus their predictions) [@telford2009evaluation] it is not always the case that spatially proximate samples are compositionally proximate, and indeed, pollen assemblages in densely sampled regions may exhibit no-analogue characteristics.
 
 ```{r Fig2MinDissim, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations', echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -195,7 +250,7 @@ grid.arrange(loss, loss.map, ncol=2)
 **Figure 4**. *As the analogue distance exclusion is increased the available data set size is reduced, although some points continue to maintain a large number of potential analogues, this is directly related to the minimum distance to the closest analogue.  Points that maintain a large pool of analogues are far from neighbours.*
 
 We have an interesting distribution of loss here.  First, the color coding is based on loss to 'non-analogue' conditions, and we see that it is possible for some samples to have relatively low loss to the no-analogue point, but then much higher losses to the extreme end of our analogue space (see the magenta lines at the very bottom end of Figure 4a.).  Secondly, the points that lose the most samples tend to be in the boreal forest.  To some degree this is surprising, however, the dominance of Pinus and Picea in these forests likely means that they have smaller analogue distances from one another than samples in the southern forests (with more diversity and therfore, likely fewer close analogues), but also, surpisingly, arctic samples also have higer inter-sample distances, and are thus less sensitive to losses of close analogues.
-```{r}
+```{r, , echo=FALSE, message=FALSE, warning=FALSE, fig.width=6, fig.height=5}
 
 get_analoguegradient <- function(dist){
 
