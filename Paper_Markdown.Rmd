@@ -1,5 +1,18 @@
 ---
-output: pdf_document
+title: "Non-analogues in paleoecological reconstruction"
+author: "Simon Goring *et al*."
+date: '`r format(Sys.time(), ''%d %B, %Y'')`'
+output:
+  pdf_document:
+    pandoc_args: -V geometry:vmargin=1in -V geometry:hmargin=1in
+  md_document:
+    variant: markdown_github
+  word_document:
+    fig_height: 6
+    fig_width: 6
+csl: ecology.csl
+pandoc_args: -H margins.sty
+bibliography: non-analogue_clim.bib
 ---
 Non-analogues in paleoecological reconstruction - the effects of analogue distance
 ========================================================
