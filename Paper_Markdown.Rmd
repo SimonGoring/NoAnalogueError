@@ -70,11 +70,15 @@ source('R/data_setup.R')
 Introduction
 =========================
 
-Pollen assemblages are widely used for paleoclimatic reconstruction during the Holocene, but this method is also applied to pollen assemblages from the last Glacial period [@bartlein2011pollen, @kaufman2012multi], and earlier [@tarasov2011progress; @brewer2008climate, @cheddadi1998climate].  A particular challenge for climate reconstruction using these much earlier samples is the presence of non-analogue vegetation.  Non-analogue pollen assemblages pose a problem for many reconstruction techniques, these vegetation assemblages may be the result of sets of climate variables that no longer co-exist, ecological conditions resulting from differing rates of species migration [@huntley1991plants] or release from herbivores [@gill2009pleistocene], or as a result of changes in human land use [@goring2015preset].
+Pollen assemblages are widely used for paleoclimatic reconstruction during the Holocene, but this method is also applied to pollen assemblages from the last Glacial period [@bartlein2011pollen, @kaufman2012multi], and earlier [@tarasov2011progress; @brewer2008climate, @cheddadi1998climate]. A particular challenge for climate reconstruction using these much earlier samples is the presence of non-analogue vegetation. Non-analogue pollen assemblages pose a problem for many reconstruction techniques, these vegetation assemblages may be the result of sets of climate variables that no longer co-exist, ecological conditions resulting from differing rates of species migration [@huntley1991plants] or release from herbivores [@gill2009pleistocene], or as a result of changes in human land use [@goring2015preset].
 
 Predicting climate from pollen in non-analogue space is likely to increase the uncertainty of models, possibly introduce systematic bias in predictions, and is likely to increase the variability of predictions across a time-series of predictions from a single site. However, high-quality terrestrial proxies for climate are important for understanding past climate change, and can act as a constraint on models of climate change in the past derived from GCMs in regions where little proxy data is available.  Thus, understanding the behaviour of pollen-based climate reconstructions in non-analogue space is an important first stem in understanding these reconstructions.
 
-Although we cannot know the values for temperature or precipitation during this time, statistical non-analogues do exist in a modern context, and we can construct false non-analogues using a modified h-block sampling procedure [*sensu*, @telford2009evaluation] that examines analogue distance rather than geographical distance.
+Although we cannot know the values for temperature or precipitation during this time, statistical non-analogues do exist in a modern context, and we can construct false non-analogues using a modified h-block sampling procedure [*sensu*, @telford2009evaluation] that examines analogue distance rather than geographical distance.  The result of no-analogue prediction is likely to vary with the method used for climate reconstruction, and possibly the climate variable (or distribution of the climate variable) of interest. This has been shown to occur with reconstructions from mixed depositional environments [@goring2010pollen], and more broadly, related families of methods are likely to behave similarly [KNUTTIPaper, NEWCANNONPAPER].
+
+The Modern Analogue Technique is effectively a k-nearest neighbors method, generally using a squared-chord metric of distance.  MAT is used commonly in paleoecological reconstruction [@overpeck1985quantitative], but the k-nearest neighbor alogrithm is common to big data analysis. With MAT, the effects of moving toward no-analogue space will likely vary depending on the location of the sample in multi-dimentsional space.  We expect that a sample close to the average of all samples will show increasing predictive variability, but little effect on the mean prediction as the closest analogues become progressvely further from the focal sample, but the average of distant samples remains similar. In general, with increasing analogue distance we expect samples should revert toward the mean, while also showing higher variability.  Of all the methods, MAT's dependence on the local neighborhood likely suggests that we should expect a higher increase in variance with increasing analogue distance.
+
+When WA is used for reconstruction in no-analogue space it is likely that species combinations found along the climatic gradient of interest are absent, meaning higher variability of prediction and greater likelihood that species optima or tolerances will be misinterpreted.  This is likely to be most significant for taxa with bimodal distributions, 
 
 Methods:
 =========================
@@ -83,19 +87,9 @@ Sites from across North America were used to build a modern analogue dataset.  S
 
 ```{r Fig1SiteLocations, fig.width=7, fig.height=6, fig.cap='Figure: North American site locations', echo=FALSE, message=FALSE, warning=FALSE}
 
-map <- map_data('world')
+source('R/figures/figure1_map.R')
 
-map <- subset(map, map$long > -160 & map$long < -30)
-map <- subset(map, map$lat > 20 & map$lat < 83)
-
-ggplot(data = data.frame(map), aes(long, lat)) + 
-  geom_polygon(aes(group=group), color='blue', alpha=0.7) +
-  geom_point(data = data.frame(climate), aes(x = LONDD, y = LATDD), alpha = 0.5) +
-  theme_bw() +
-  xlab('') + ylab('') +
-  theme(axis.text=element_text(size=12, family='serif'),
-        panel.background = element_rect(fill = 'lightblue')) +
-  coord_map(projection='albers', lat0=35, lat1=55, xlim=c(-100, -60), ylim=c(35, 80))
+map_plot
 
 ```
 
@@ -103,10 +97,9 @@ ggplot(data = data.frame(map), aes(long, lat)) +
 
 To analyse the effects of non-analogue pollen on model skill we chose five pollen-based reconstruction methods from the literature and apply them to the modern pollen data from eastern North America.  The models are MAT [@overpeck1985quantitative], WA [@ter1993weighted], WAPLS [@ter1989inferring], BRT and randomForest.  Each of these models has been used previously in the pollen literature, and has strengths and weaknesses.  MAT is commonly applied to reconstruct climate, for pollen, diatoms, chironomids and other taxa.  WA has a long history in the literature, and the recent development of monotone deshrinking has apparently improved performance further (Simpson, 2014?), but WA continues to suffer from a basic assumption of unimodal taxon distributions along climate gradients.
 
-WAPLS does this and that. . . 
+WAPLS is a modification of WA, whereby the residuals for each component are again weighted and regressed and the number of components are chosen by minimizing the root mean squared error (RMSE) of the model [@ter1993weighted].
 
-BRT [@de2007boosted] and randomForest [@breiman2001random] are ensemble machine-learning approaches which have seen increasing use in fossil pollen literature during the past few years [][SOME REFS HERE IF NECESSARY ... GORING ET AL. 2010, ZHAO ET AL. 2012, SALONEN ET AL. 2014...]. Both methods are based on creating an ensemble of regression tree models with all pollen taxa used as predictors and an environmental variable of choice as the response. The randomForest creates an ensemble of independent tree models (here 500 trees), while using bootstrap samples of the calibration data when building each tree, and randomly selected subsets of the predictor set when determining each tree split, thus creating diversity in the tree ensemble. In BRT, by comparison, the tree ensemble is built sequentially, with each added tree aiming to explain the residuals of the previously fitted ensemble. The final BRT model can thus be likened to an additive regression model in which the individual terms are regression trees.
-
+BRT [@de2007boosted] and randomForest [@breiman2001random] are ensemble machine-learning approaches which have seen increasing use in fossil pollen literature during the past few years [@goring2010pollen;@salonen2014reconstructing;@salonen2012north;@zhao2012application]. Both machine learning methods are based on creating an ensemble of regression tree models with all pollen taxa used as predictors and an environmental variable of choice as the response. The random forest creates an ensemble of independent tree models (here 500 trees), while using bootstrap samples of the calibration data when building each tree, and randomly selected subsets of the predictor set when determining each tree split, thus creating diversity in the tree ensemble. In BRT, by comparison, the tree ensemble is built sequentially, with each added tree aiming to explain the residuals of the previously fitted ensemble. The final BRT model can thus be likened to an additive regression model in which the individual terms are regression trees.
 
 For each pollen model and each sample site we calibrated a model to reconstruct T_{jul} using a pool of samples selected by removing all pollen samples closer than an analogue distance that increased from 0 to 1 at a step size of 0.01.  The calibration dataset for each model and each sample, at each exclusion step was then bootstrapped 30 times, sampling with replacement from the available calibration samples, to obtain a variance parameter, along with a mean prediction, bias estimate, root mean squared error of prediction and sample size estimate.  This full procedure reqired 29,254,650 individual calibrated models (although a number failed due to small sample sizes with large analogue exclusion distances).  To facilitate this large number of models, and the significant processing time, we ran the simulations on an Amazon AWS EC2 server as a parallel process using 30 cores.
 
