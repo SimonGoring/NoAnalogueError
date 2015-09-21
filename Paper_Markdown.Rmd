@@ -192,6 +192,7 @@ load('data/wa.res.RData')
 load('data/wapls.res.RData')
 load('data/brt.res.RData')
 load('data/rfor.res.RData')
+load('data/rand.res.RData')
 
 vals <- c(seq(0, 1, by=0.01))
 
@@ -290,26 +291,30 @@ init.color <- colorRampPalette(c('#F08080', '#68d64f', '#4169E1'))
 clim.colors <- seq(0, 31, length.out = 300)
 init.set <- init.color(300)[findInterval(x = climate[,10], vec=clim.colors)]
 
-model.out <- data.frame(site   = rep(rep(climate[,1], ncol(wa.res$bias)),5),
-                        preds  = c(as.vector(mat.res$mean_prediction),
+model.out <- data.frame(site   = rep(rep(climate[,1], ncol(wa.res$bias)),6),
+                        preds  = c(as.vector(rand.res$mean_prediction),
+                                   as.vector(mat.res$mean_prediction),
                                    as.vector(wa.res$mean_prediction),
                                    as.vector(wapls.res$mean_prediction),
                                    as.vector(rfor.res$mean_prediction),
                                    as.vector(brt.res$mean_prediction)),
-                        bias   = c(as.vector(mat.res$bias),
+                        bias   = c(as.vector(rand.res$bias),
+                                   as.vector(mat.res$bias),
                                    as.vector(wa.res$bias),
                                    as.vector(wapls.res$bias),
                                    as.vector(rfor.res$bias),
                                    as.vector(brt.res$bias)),
-                        variance = c(as.vector(mat.res$variance),
+                        variance = c(as.vector(rand.res$variance),
+                                     as.vector(mat.res$variance),
                                    as.vector(wa.res$variance),
                                    as.vector(wapls.res$variance),
                                    as.vector(rfor.res$variance),
                                    as.vector(brt.res$variance)),
-                        dissim = rep(rep(vals, each=nrow(wa.res$bias)),5),
-                        model  = rep(c('MAT', 'WA', 'WAPLS', 'rFor', 'BRT'), 
+                        dissim = rep(rep(vals, each=nrow(wa.res$bias)),6),
+                        model  = factor(rep(c('NULL','MAT', 'WA', 'WAPLS', 'rFor', 'BRT'), 
                                      each = length(wa.res$bias)),
-                        init = rep(rep(climate[,10], 101), 5))
+                                     levels=c('NULL', 'MAT', 'rFor', 'BRT', 'WA', 'WAPLS')),
+                        init = rep(rep(climate[,10], 101), 6))
 
 #  This kills ~ 300,000 rows right now because of gaps in rfor.res and brt.res.
 model.out <- model.out[!rowSums(is.na(model.out)) > 0,]
@@ -328,7 +333,7 @@ sample.model <- function(x){
   
 }
 
-samp.set <- sapply(c('MAT', 'WA', 'WAPLS', 'rFor', 'BRT'), sample.model)
+samp.set <- sapply(c('NULL','MAT', 'WA', 'WAPLS', 'rFor', 'BRT'), sample.model)
 
 model.samp <- model.out[unlist(samp.set),]
 
@@ -340,6 +345,7 @@ ggplot(model.samp, aes(x = dissim, y = preds, group = site, color = init)) +
   facet_wrap(~model, nrow = 1) +
   scale_x_continuous(expand=c(0,0), breaks = c(0.5, 1)) +
   scale_y_continuous(expand=c(0,0), limits=c(0, 40)) +
+  coord_cartesian() +
   #scale_color_continuous(low = 'blue', high='pink', trans='sqrt') +
   theme(legend.position = 'none',
         axis.title = element_text(family = 'serif', face = 'bold', size = 14),
@@ -363,7 +369,7 @@ ggplot(model.samp, aes(x = dissim, y = sqrt(bias), group = site, color = init)) 
   facet_wrap(~model, nrow = 1) +
   scale_x_continuous(expand=c(0,0), breaks = c(0.5, 1)) +
   scale_y_sqrt(expand=c(0,0)) +
-  scale_color_continuous(low = 'blue', high='pink', trans='sqrt') +
+  #scale_color_continuous(low = 'blue', high='pink', trans='sqrt') +
   theme(legend.position = 'none',
         axis.title = element_text(family = 'serif', face = 'bold', size = 14),
         strip.text = element_text(family = 'serif', face = 'bold', size = 14),
