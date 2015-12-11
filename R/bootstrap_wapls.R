@@ -46,6 +46,8 @@ wapls.run <- function(j){
                      x = x$calib.clim[!bad.clim]))
   
   if (length(wapls) > 1){
+    #  If not an error, pick the number of components based on minimizing the predictive
+    #  error from the calibration set.
     pred.wapls <- predict(wapls, newdata = new.pol[j,!zeros])
     output     <- pred.wapls$fit[which.min(rioja::performance(wapls)$object[,1])]
     }
